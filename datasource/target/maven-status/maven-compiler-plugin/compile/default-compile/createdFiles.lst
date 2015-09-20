@@ -1,0 +1,6 @@
+ch/protonmail/vladyslavbond/quizzing/datasource/DataAccess.class
+ch/protonmail/vladyslavbond/quizzing/datasource/DataAccessException.class
+ch/protonmail/vladyslavbond/quizzing/datasource/Mapper.class
+ch/protonmail/vladyslavbond/quizzing/datasource/StatementFactory.class
+ch/protonmail/vladyslavbond/quizzing/datasource/NativeStatementFactory.class
+ch/protonmail/vladyslavbond/quizzing/datasource/ConnectionFactory.class

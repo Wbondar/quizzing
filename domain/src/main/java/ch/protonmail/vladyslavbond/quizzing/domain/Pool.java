@@ -1,0 +1,61 @@
+package ch.protonmail.vladyslavbond.quizzing.domain;
+
+import java.util.Set;
+
+public final class Pool 
+implements Identifiable<Pool>
+{
+	public final static Pool EMPTY = new Pool ( );
+	
+	private Pool ( )
+	{
+		this.id = new IntIdentificator<Pool> (0);
+		this.title = "Title of the pool is missing.";
+	}
+	
+	Pool (Identificator<Pool> id, String title)
+	{
+		this.id = id;
+		this.title = title;
+	}
+	
+	public Set<Task> getTasks (int quantityOfTasksToBeFetched)
+	{
+		return Factories.<TaskFactory>getInstance(TaskFactory.class).getInstances(this.id, quantityOfTasksToBeFetched);
+	}
+	
+	private final String title;
+	
+	public String getTitle ( )
+	{
+		return this.title;
+	}
+	
+	private final Identificator<Pool> id;
+	
+	@Override
+	public Identificator<Pool> getId ( ) 
+	{
+		return this.id;
+	}
+	
+	@Override
+	public boolean equals (Object o)
+	{
+		if (o == null)
+		{
+			return false;
+		}
+		if (o instanceof Pool)
+		{
+			return o.hashCode( ) == this.hashCode( );
+		}
+		return false;
+	}
+	
+	@Override
+	public int hashCode ( )
+	{
+		return this.id.hashCode( );
+	}
+}
