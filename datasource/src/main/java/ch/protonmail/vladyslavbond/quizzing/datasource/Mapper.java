@@ -1,18 +1,15 @@
 package ch.protonmail.vladyslavbond.quizzing.datasource;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 
 public abstract class Mapper<T> 
 {
     private final           Class<T>              type;
-    private       transient Set<Class<?>>         parameterTypes  = new HashSet<Class<?>> ( );
     private       transient Map<String, Class<?>> labelToType     = new HashMap<String, Class<?>> ( );
     private       transient Map<String, Object>   labelToArgument = new HashMap<String, Object> ( );
 
-    Mapper (Class<T> type)
+    protected Mapper (Class<T> type)
     {
         this.type = type;
     }
@@ -30,16 +27,31 @@ public abstract class Mapper<T>
         return this.type;
     }
     
+    /**
+     * DataAccess class uses this method to provide necessary values 
+     * for building entities.
+     * @param label label of a relational database column from which value was retrieved
+     * @param parameterType type of Java class that can be mapped to SQL types
+     * @param argument value stored in a column
+     */
+    
     public final void set (String label, Class<?> parameterType, Object argument)
     {
         if (argument == null)
         {
             remove(label);
         }
-        this.parameterTypes.add(parameterType);
         this.labelToType.put(label, parameterType);
         this.labelToArgument.put(label, argument);
     }
+    
+    /**
+     * Use this method to retrieve values previously provided by DataAccess class
+     * for building entities
+     * @param label label of a relational database column from which value was retrieved
+     * @param parameterType type of Java class that can be mapped to SQL types
+     * @return value which was previously stored in a column
+     */
     
     public final <P> P get (String label, Class<P> parameterType)
     {
@@ -52,11 +64,17 @@ public abstract class Mapper<T>
         this.labelToArgument.remove(label);
     }
     
+    /**
+     * Use the method each time when finished building entity
+     * so that given instance of the class could be reused
+     * for building another entity
+     * without older entries interfering.
+     */
+    
     public final void clear ( )
     {
         this.labelToArgument.clear( );
         this.labelToType.clear( );
-        this.parameterTypes.clear( );
     }
 
     public abstract T build();

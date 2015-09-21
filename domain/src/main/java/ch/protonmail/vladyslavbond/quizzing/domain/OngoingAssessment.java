@@ -1,5 +1,7 @@
 package ch.protonmail.vladyslavbond.quizzing.domain;
 
+import ch.protonmail.vladyslavbond.quizzing.util.Identificator;
+
 public final class OngoingAssessment 
 extends Assessment 
 {
@@ -29,7 +31,7 @@ extends Assessment
 				if (task.provideAnswer(answer))
 				{
 					AnswerFactory answerFactory = Factories.<AnswerFactory>getInstance(AnswerFactory.class);
-					return answerFactory.newInstance(this, task, task.getInput( ));
+					return answerFactory.newInstance(this, task, answer);
 				}
 				return Answer.EMPTY;
 			}
@@ -52,6 +54,6 @@ extends Assessment
 	
 	public final void finish ( )
 	{
-		
+		// TODO
 	}
 }

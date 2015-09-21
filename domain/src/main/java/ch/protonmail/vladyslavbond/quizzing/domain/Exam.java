@@ -2,6 +2,10 @@ package ch.protonmail.vladyslavbond.quizzing.domain;
 
 import java.util.Set;
 
+import ch.protonmail.vladyslavbond.quizzing.util.Identifiable;
+import ch.protonmail.vladyslavbond.quizzing.util.Identificator;
+import ch.protonmail.vladyslavbond.quizzing.util.NumericIdentificator;
+
 public final class Exam 
 implements Identifiable<Exam> 
 {
@@ -9,7 +13,7 @@ implements Identifiable<Exam>
 	
 	private Exam ( )
 	{
-		this.id = new IntIdentificator<Exam> (0);
+		this.id = NumericIdentificator.<Exam>valueOf(0);
 		this.title = "Title of the exam is missing.";
 	}
 	

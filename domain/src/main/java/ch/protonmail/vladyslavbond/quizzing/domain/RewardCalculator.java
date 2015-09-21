@@ -1,5 +1,7 @@
 package ch.protonmail.vladyslavbond.quizzing.domain;
 
+import ch.protonmail.vladyslavbond.quizzing.util.Identifiable;
+
 abstract class RewardCalculator 
 implements Identifiable<RewardCalculator> 
 {

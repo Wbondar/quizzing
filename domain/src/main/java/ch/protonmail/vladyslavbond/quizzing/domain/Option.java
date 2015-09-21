@@ -1,5 +1,9 @@
 package ch.protonmail.vladyslavbond.quizzing.domain;
 
+import ch.protonmail.vladyslavbond.quizzing.util.Identifiable;
+import ch.protonmail.vladyslavbond.quizzing.util.Identificator;
+import ch.protonmail.vladyslavbond.quizzing.util.NumericIdentificator;
+
 public final class Option 
 implements Identifiable<Option>
 {
@@ -7,7 +11,7 @@ implements Identifiable<Option>
 	
 	private Option ( ) 
 	{
-		this.id      = (Identificator<Option>)new IntIdentificator<Option> (0);
+		this.id      = (Identificator<Option>)NumericIdentificator.<Option>valueOf(0);
 		this.message = "Message of option is missing.";
 		this.reward  = 0;
 	}

@@ -1,6 +1,6 @@
 package ch.protonmail.vladyslavbond.quizzing.domain;
 
-import java.util.Collection;
+import ch.protonmail.vladyslavbond.quizzing.util.Identificator;
 
 public final class ScoredAnswer 
 extends Answer 
@@ -17,7 +17,7 @@ extends Answer
 		this(answer.getId( ), answer.getTask( ), answer.getStudent( ), answer.getInput( ), reward);
 	}
 	
-	ScoredAnswer (Identificator<Answer> id, Task task, Student student, Collection<String> input, int reward)
+	ScoredAnswer (Identificator<Answer> id, Task task, Student student, String input, int reward)
 	{
 		super(id, task, student, input);
 		this.reward = reward;

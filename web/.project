@@ -6,6 +6,7 @@
     <project>controllers</project>
     <project>domain</project>
     <project>datasource</project>
+    <project>util</project>
   </projects>
   <buildSpec>
     <buildCommand>

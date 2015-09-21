@@ -1,7 +1,5 @@
 package ch.protonmail.vladyslavbond.quizzing.controllers;
 
-import ch.protonmail.vladyslavbond.quizzing.domain.*;
-
 public final class Sessions 
 extends Controller 
 {

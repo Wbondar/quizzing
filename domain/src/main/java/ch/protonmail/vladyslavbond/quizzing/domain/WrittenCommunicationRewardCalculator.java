@@ -3,6 +3,9 @@ package ch.protonmail.vladyslavbond.quizzing.domain;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import ch.protonmail.vladyslavbond.quizzing.util.Identificator;
+import ch.protonmail.vladyslavbond.quizzing.util.NumericIdentificator;
+
 final class WrittenCommunicationRewardCalculator 
 extends RewardCalculator 
 {
@@ -37,7 +40,7 @@ extends RewardCalculator
 		return this.input;
 	}
 	
-	private final static Identificator<RewardCalculator> ID = new IntIdentificator<RewardCalculator> (4);
+	private final static Identificator<RewardCalculator> ID = NumericIdentificator.<RewardCalculator>valueOf(4);
 	
 	@Override
 	public final Identificator<RewardCalculator> getId ( )

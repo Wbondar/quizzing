@@ -1,7 +1,6 @@
 package ch.protonmail.vladyslavbond.quizzing.domain;
 
-import java.util.Collection;
-import java.util.Collections;
+import ch.protonmail.vladyslavbond.quizzing.util.*;
 
 public class Answer 
 implements Identifiable<Answer>
@@ -10,30 +9,23 @@ implements Identifiable<Answer>
 
 	private Answer ( )
 	{
-		this.id = new IntIdentificator<Answer> (0);
-		this.task = Task.EMPTY;
+		this.id      = NumericIdentificator.<Answer>valueOf(0);
+		this.task    = Task.EMPTY;
 		this.student = Student.EMPTY;
-		this.input = Collections.<String>emptyList( );
+		this.input   = "Input is missing.";
 	}
-
-	/**
-	 * TODO: Input has to be single string.
-	 * Multiple choice tasks will have multiple answers 
-	 * instead of single answer containing 
-	 * multiple inputs in a single answer.
-	 */
-
-	Answer (Identificator<Answer> id, Task task, Student student, Collection<String> input)
+	
+	Answer (Identificator<Answer> id, Task task, Student student, String input)
 	{
 		this.id      = id;
 		this.task    = task;
 		this.student = student;
-		this.input   = Collections.<String>unmodifiableCollection(input);
+		this.input   = input;
 	}
 	
-	Answer (int id, Task task, Student student, Collection<String> input)
+	Answer (int id, Task task, Student student, String input)
 	{
-		this(new IntIdentificator<Answer> (id), task, student, input);
+		this(NumericIdentificator.<Answer>valueOf(id), task, student, input);
 	}
 	
 	private final Task task;
@@ -50,9 +42,9 @@ implements Identifiable<Answer>
 		return this.student;
 	}
 	
-	private final Collection<String> input;
+	private final String input;
 	
-	public final Collection<String> getInput ( )
+	public final String getInput ( )
 	{
 		return this.input;
 	}

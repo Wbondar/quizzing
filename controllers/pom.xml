@@ -16,5 +16,10 @@
       <groupId>ch.protonmail.vladyslavbond.quizzing</groupId>
       <version>1.0-SNAPSHOT</version>
     </dependency>
+    <dependency>
+      <artifactId>util</artifactId>
+      <groupId>ch.protonmail.vladyslavbond.quizzing</groupId>
+      <version>1.0-SNAPSHOT</version>
+    </dependency>
   </dependencies>
 </project>

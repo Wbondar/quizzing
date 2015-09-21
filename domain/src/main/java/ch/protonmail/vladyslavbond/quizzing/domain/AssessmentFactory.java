@@ -2,16 +2,22 @@ package ch.protonmail.vladyslavbond.quizzing.domain;
 
 import java.util.Set;
 
+import ch.protonmail.vladyslavbond.quizzing.util.Identificator;
+import ch.protonmail.vladyslavbond.quizzing.util.NumericIdentificator;
+
 public final class AssessmentFactory 
 extends SimpleFactory<Assessment>
 implements Factory<Assessment> 
 {
-	AssessmentFactory ( ) {}
+    AssessmentFactory ( ) 
+    {
+        super(Assessment.class, new AssessmentMapper ( ));
+    }
 	
 	public OngoingAssessment newInstance (Student student, Exam exam)
 	{
 		// TODO
-		return new OngoingAssessment(new Assessment (new IntIdentificator<Assessment> (0), student, exam.getTasks( )));
+		return new OngoingAssessment(new Assessment (NumericIdentificator.<Assessment>valueOf(0), student, exam.getTasks( )));
 	}
 	
 	@Override

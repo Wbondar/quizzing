@@ -1,56 +1,22 @@
 package ch.protonmail.vladyslavbond.quizzing.domain;
 
-import java.sql.Connection;
-import java.sql.CallableStatement;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
+import ch.protonmail.vladyslavbond.quizzing.datasource.DataAccess;
+import ch.protonmail.vladyslavbond.quizzing.datasource.DataAccessFactory;
+import ch.protonmail.vladyslavbond.quizzing.datasource.Mapper;
+import ch.protonmail.vladyslavbond.quizzing.util.Identifiable;
 
 abstract class SimpleFactory<T extends Identifiable<T>>
 implements Factory<T> 
 {
-	SimpleFactory ( ) 
+    private final DataAccess<T> dataAccess;
+    
+	protected SimpleFactory (Class<T> type, Mapper<T> mapper) 
 	{
-		this(DatasourceConnectionFactory.INSTANCE);
-	}
-
-	private SimpleFactory (ConnectionFactory connectionFactory)
-	{
-		this.connectionFactory = connectionFactory;
-	}
-
-	private final ConnectionFactory connectionFactory;
-	
-	private final Connection getConnection ( )
-	throws SQLException
-	{
-		return this.connectionFactory.getConnection( );
+	    this.dataAccess = DataAccessFactory.<T>getInstance(type, mapper);
 	}
 	
-	protected final CallableStatement prepareCall (String query)
-	throws SQLException
+	protected final DataAccess<T> getDataAccess ( )
 	{
-		try
-		(
-			Connection connection = this.getConnection( );
-		)
-		{
-			return connection.prepareCall(query);
-		} catch (SQLException e) {
-			throw e;
-		}
-	}
-	
-	protected final PreparedStatement prepareStatement (String query)
-	throws SQLException
-	{
-		try
-		(
-			Connection connection = this.getConnection( );
-		)
-		{
-			return connection.prepareStatement(query);
-		} catch (SQLException e) {
-			throw e;
-		}
+	    return this.dataAccess;
 	}
 }

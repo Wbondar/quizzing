@@ -3,6 +3,10 @@ package ch.protonmail.vladyslavbond.quizzing.domain;
 import java.util.Collections;
 import java.util.Set;
 
+import ch.protonmail.vladyslavbond.quizzing.util.Identifiable;
+import ch.protonmail.vladyslavbond.quizzing.util.Identificator;
+import ch.protonmail.vladyslavbond.quizzing.util.NumericIdentificator;
+
 public final class Task 
 implements Identifiable<Task>
 {
@@ -10,7 +14,7 @@ implements Identifiable<Task>
 	
 	private Task ( )
 	{
-		this.id          = (Identificator<Task>)new IntIdentificator<Task> (0);
+		this.id          = (Identificator<Task>)NumericIdentificator.<Task>valueOf(0);
 		this.calculator  = new WrittenCommunicationRewardCalculator (this);
 		this.description = "Description of the task is missing.";
 		this.options     = Collections.<Option>emptySet( );
@@ -87,11 +91,6 @@ implements Identifiable<Task>
 	public final Integer score ( )
 	{
 		return this.calculator.score( );
-	}
-	
-	public final java.util.Collection<String> getInput ( )
-	{
-		return this.calculator.getInput( );
 	}
 	
 	@Override

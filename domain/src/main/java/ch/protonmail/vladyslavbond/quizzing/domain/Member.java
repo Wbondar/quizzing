@@ -1,24 +1,36 @@
 package ch.protonmail.vladyslavbond.quizzing.domain;
 
+import ch.protonmail.vladyslavbond.quizzing.util.Identifiable;
+import ch.protonmail.vladyslavbond.quizzing.util.Identificator;
+import ch.protonmail.vladyslavbond.quizzing.util.NumericIdentificator;
+
 public class Member 
 implements Identifiable<Member>
 {
 	public static final Member EMPTY = new Member ( );
+    private final String screenName;
 	
 	private Member ( )
 	{
-		this.username = new Username("noname");
+		this.id         = NumericIdentificator.<Member>valueOf(0);
+		this.screenName = "nominevacans";
 	}
 	
-	Member (Identificator<Member> username)
-	{
-		this.username = username;
-	}
-	
-	private final Identificator<Member> username;
+	public Member(Identificator<Member> id, String screenName)
+    {
+        this.id = id;
+        this.screenName = screenName;
+    }
+
+    private final Identificator<Member> id;
 	
 	public Identificator<Member> getId ( )
 	{
-		return this.username;
+		return this.id;
+	}
+	
+	public String getScreenName ( )
+	{
+	    return this.screenName;
 	}
 }

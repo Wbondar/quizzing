@@ -4,6 +4,9 @@ import java.util.Collections;
 import java.util.Set;
 import java.util.HashSet;
 
+import ch.protonmail.vladyslavbond.quizzing.util.Identificator;
+import ch.protonmail.vladyslavbond.quizzing.util.NumericIdentificator;
+
 final class ChoiceMultipleRewardCalculator 
 extends RewardCalculator 
 {
@@ -17,7 +20,7 @@ extends RewardCalculator
 	@Override
 	public boolean provideAnswer (String answer)
 	{
-		Identificator<Option> idOfOption = new IntIdentificator<Option> (Integer.valueOf(answer));
+		Identificator<Option> idOfOption = NumericIdentificator.<Option>valueOf(Integer.valueOf(answer));
 		for (Option availableOption : this.getTask( ).getOptions( ))
 		{
 			if (availableOption.getId( ).equals(idOfOption))
@@ -50,7 +53,7 @@ extends RewardCalculator
 		return input;
 	}
 	
-	private final static Identificator<RewardCalculator> ID = new IntIdentificator<RewardCalculator> (1);
+	private final static Identificator<RewardCalculator> ID = NumericIdentificator.<RewardCalculator>valueOf(1);
 	
 	@Override
 	public final Identificator<RewardCalculator> getId ( )

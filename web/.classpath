@@ -11,6 +11,7 @@
   <classpathentry kind="src" path="/controllers"/>
   <classpathentry kind="src" path="/domain"/>
   <classpathentry kind="src" path="/datasource"/>
+  <classpathentry kind="src" path="/util"/>
   <classpathentry kind="var" path="M2_REPO/com/sun/jersey/jersey-servlet/1.19/jersey-servlet-1.19.jar"/>
   <classpathentry kind="var" path="M2_REPO/com/sun/jersey/jersey-server/1.19/jersey-server-1.19.jar"/>
   <classpathentry kind="var" path="M2_REPO/com/sun/jersey/jersey-core/1.19/jersey-core-1.19.jar"/>

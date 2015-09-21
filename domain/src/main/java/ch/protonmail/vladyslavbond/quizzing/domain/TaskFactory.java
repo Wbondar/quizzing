@@ -3,11 +3,16 @@ package ch.protonmail.vladyslavbond.quizzing.domain;
 import java.util.Collections;
 import java.util.Set;
 
+import ch.protonmail.vladyslavbond.quizzing.util.Identificator;
+
 public final class TaskFactory 
 extends SimpleFactory<Task>
 implements Factory<Task> 
 {
-	TaskFactory ( ) {}
+    TaskFactory ( ) 
+    {
+        super(Task.class, new TaskMapper ( ));
+    }
 	
 	@Override
 	public Task getInstance (Identificator<Task> id) 
@@ -30,7 +35,7 @@ implements Factory<Task>
 
 	public Task newInstance(String descriptionOfTask, Integer idOfTaskType) {
 		// TODO Auto-generated method stub
-		return new Task(new IntIdentificator<Task> (0), null, descriptionOfTask);
+		return Task.EMPTY;
 	}
 
 	public Task update(Task task, String descriptionOfTask) {
@@ -46,5 +51,11 @@ implements Factory<Task>
 	public Set<Task> getInstances(Exam exam) {
 		// TODO Auto-generated method stub
 		return Collections.<Task>emptySet( );
+	}
+	
+	public Set<Task> getAssessmentInstances (Identificator<Assessment> id)
+	{
+        // TODO Auto-generated method stub
+        return Collections.<Task>emptySet( );
 	}
 }

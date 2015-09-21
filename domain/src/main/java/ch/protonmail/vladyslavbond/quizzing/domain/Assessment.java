@@ -3,6 +3,10 @@ package ch.protonmail.vladyslavbond.quizzing.domain;
 import java.util.Collections;
 import java.util.Set;
 
+import ch.protonmail.vladyslavbond.quizzing.util.Identifiable;
+import ch.protonmail.vladyslavbond.quizzing.util.Identificator;
+import ch.protonmail.vladyslavbond.quizzing.util.NumericIdentificator;
+
 public class Assessment 
 implements Identifiable<Assessment>
 {
@@ -10,7 +14,7 @@ implements Identifiable<Assessment>
 	
 	private Assessment ( )
 	{
-		this.id      = (Identificator<Assessment>) new IntIdentificator<Assessment>(0);
+		this.id      = (Identificator<Assessment>)NumericIdentificator.<Assessment>valueOf(0);
 		this.student = Student.EMPTY;
 		this.tasks   = Collections.<Task>emptySet( );
 	}

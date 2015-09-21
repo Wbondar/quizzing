@@ -1,5 +1,8 @@
 package ch.protonmail.vladyslavbond.quizzing.domain;
 
+import ch.protonmail.vladyslavbond.quizzing.util.Identificator;
+import ch.protonmail.vladyslavbond.quizzing.util.NumericIdentificator;
+
 final class ChoiceSingleRewardCalculator 
 extends RewardCalculator 
 {
@@ -14,7 +17,7 @@ extends RewardCalculator
 	public boolean provideAnswer (String answer)
 	{
 		this.selectedOption = null;
-		Identificator<Option> idOfOption = new IntIdentificator<Option> (Integer.valueOf(answer));
+		Identificator<Option> idOfOption = NumericIdentificator.<Option>valueOf(Integer.valueOf(answer));
 		for (Option availableOption : this.getTask( ).getOptions( ))
 		{
 			if (availableOption.getId( ).equals(idOfOption))
@@ -48,7 +51,7 @@ extends RewardCalculator
 		return input;
 	}
 	
-	private final static Identificator<RewardCalculator> ID = new IntIdentificator<RewardCalculator> (2);
+	private final static Identificator<RewardCalculator> ID = NumericIdentificator.<RewardCalculator>valueOf(2);
 	
 	@Override
 	public final Identificator<RewardCalculator> getId ( )

@@ -2,6 +2,10 @@ package ch.protonmail.vladyslavbond.quizzing.domain;
 
 import java.util.Set;
 
+import ch.protonmail.vladyslavbond.quizzing.util.Identifiable;
+import ch.protonmail.vladyslavbond.quizzing.util.Identificator;
+import ch.protonmail.vladyslavbond.quizzing.util.NumericIdentificator;
+
 public final class Pool 
 implements Identifiable<Pool>
 {
@@ -9,7 +13,7 @@ implements Identifiable<Pool>
 	
 	private Pool ( )
 	{
-		this.id = new IntIdentificator<Pool> (0);
+		this.id = NumericIdentificator.<Pool>valueOf(0);
 		this.title = "Title of the pool is missing.";
 	}
 	

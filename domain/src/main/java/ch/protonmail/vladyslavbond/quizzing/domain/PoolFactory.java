@@ -2,11 +2,16 @@ package ch.protonmail.vladyslavbond.quizzing.domain;
 
 import java.util.Set;
 
+import ch.protonmail.vladyslavbond.quizzing.util.Identificator;
+
 public final class PoolFactory 
 extends SimpleFactory<Pool>
 implements Factory<Pool> 
 {
-	PoolFactory ( ) {}
+    PoolFactory ( ) 
+    {
+        super(Pool.class, new PoolMapper ( ));
+    }
 	
 	@Override
 	public Pool getInstance (Identificator<Pool> id) 
@@ -24,7 +29,7 @@ implements Factory<Pool>
 	public Pool newInstance(String titleOfPool) 
 	{
 		// TODO Auto-generated method stub
-		return new Pool (new IntIdentificator<Pool> (0), titleOfPool);
+		return Pool.EMPTY;
 	}
 
 	public Pool update(Pool pool, String titleOfPool) 

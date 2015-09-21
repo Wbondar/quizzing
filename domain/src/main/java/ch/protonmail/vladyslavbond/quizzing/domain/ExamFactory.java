@@ -1,14 +1,21 @@
 package ch.protonmail.vladyslavbond.quizzing.domain;
 
+import ch.protonmail.vladyslavbond.quizzing.util.Identificator;
+import ch.protonmail.vladyslavbond.quizzing.util.NumericIdentificator;
+
 public final class ExamFactory 
+extends SimpleFactory<Exam>
 implements Factory<Exam> 
 {
-	ExamFactory ( ) {}
+    ExamFactory ( ) 
+    {
+        super(Exam.class, new ExamMapper ( ));
+    }
 	
 	public Exam newInstance (String titleOfExam)
 	{
 		// TODO
-		return new Exam (new IntIdentificator<Exam> (0), titleOfExam);
+		return new Exam (NumericIdentificator.<Exam>valueOf(0), titleOfExam);
 	}
 	
 	@Override

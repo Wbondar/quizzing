@@ -9,20 +9,16 @@ extends Member
 	
 	private Student ( )
 	{
-		super(Member.EMPTY.getId( ));
-		this.member = Member.EMPTY;
+		super(Member.EMPTY.getId( ), Member.EMPTY.getScreenName( ));
 	}
-	
-	private final Member member;
 	
 	Student (Member member)
 	{
-		super(member.getId( ));
-		this.member = member;
+		super(member.getId( ), member.getScreenName( ));
 	}
 	
 	public final Set<Assessment> getAssessments ( )
 	{
-		return Factories.<AssessmentFactory>getInstance(AssessmentFactory.class).getInstances(this.member.getId( ));
+		return Factories.<AssessmentFactory>getInstance(AssessmentFactory.class).getInstances(super.getId( ));
 	}
 }

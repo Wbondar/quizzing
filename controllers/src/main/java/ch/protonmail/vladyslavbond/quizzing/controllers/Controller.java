@@ -1,7 +1,5 @@
 package ch.protonmail.vladyslavbond.quizzing.controllers;
 
-import ch.protonmail.vladyslavbond.quizzing.domain.*;
-
 // TODO remove this class; messages must be sent via class with static methods; use statis imports
 abstract class Controller 
 {

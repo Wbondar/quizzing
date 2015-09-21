@@ -1,5 +1,8 @@
 package ch.protonmail.vladyslavbond.quizzing.domain;
 
+import ch.protonmail.vladyslavbond.quizzing.util.Identificator;
+import ch.protonmail.vladyslavbond.quizzing.util.NumericIdentificator;
+
 final class GuessRewardCalculator 
 extends RewardCalculator 
 {
@@ -47,7 +50,7 @@ extends RewardCalculator
 		return input;
 	}
 	
-	private final static Identificator<RewardCalculator> ID = new IntIdentificator<RewardCalculator> (3);
+	private final static Identificator<RewardCalculator> ID = NumericIdentificator.<RewardCalculator>valueOf(3);
 	
 	@Override
 	public final Identificator<RewardCalculator> getId ( )
