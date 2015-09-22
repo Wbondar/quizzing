@@ -1,11 +1,11 @@
 package ch.protonmail.vladyslavbond.quizzing.domain;
 
-import ch.protonmail.vladyslavbond.quizzing.datasource.Mapper;
+import ch.protonmail.vladyslavbond.quizzing.datasource.NativeMapper;
 import ch.protonmail.vladyslavbond.quizzing.util.Identificator;
 import ch.protonmail.vladyslavbond.quizzing.util.NumericIdentificator;
 
 class OptionMapper 
-extends Mapper<Option>
+extends NativeMapper<Option>
 {
     public OptionMapper ( )
     {

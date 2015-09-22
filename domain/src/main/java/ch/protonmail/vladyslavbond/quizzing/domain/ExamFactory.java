@@ -1,5 +1,6 @@
 package ch.protonmail.vladyslavbond.quizzing.domain;
 
+import ch.protonmail.vladyslavbond.quizzing.datasource.DataAccessException;
 import ch.protonmail.vladyslavbond.quizzing.util.Identificator;
 import ch.protonmail.vladyslavbond.quizzing.util.NumericIdentificator;
 
@@ -12,32 +13,87 @@ implements Factory<Exam>
         super(Exam.class, new ExamMapper ( ));
     }
 	
-	public Exam newInstance (String titleOfExam)
+	public Exam newInstance (Identificator<Instructor> idOfInstructor, String titleOfExam)
 	{
-		// TODO
-		return new Exam (NumericIdentificator.<Exam>valueOf(0), titleOfExam);
+      Object[] arguments = {
+                  ((NumericIdentificator<Instructor>)idOfInstructor).longValue()
+                , titleOfExam
+      };
+      try
+      {
+          return this.getDataAccess( ).store("{CALL exam_create(?, ?)}", arguments);
+      } catch (DataAccessException e)
+      {
+          throw new ExamFactoryException (e);
+      } finally {
+          return Exam.EMPTY;
+      }
 	}
 	
 	@Override
 	public Exam getInstance (Identificator<Exam> id) 
 	{
-		// TODO
-		return Exam.EMPTY;
+      Object[] arguments = {
+                  ((NumericIdentificator<Exam>)id).longValue()
+      };
+      try
+      {
+          return this.getDataAccess( ).fetch("SELECT * FROM view_exams WHERE id = ?;", arguments);
+      } catch (DataAccessException e)
+      {
+          throw new ExamFactoryException (e);
+      } finally {
+          return Exam.EMPTY;
+      }
 	}
 	
 	public Exam update (Exam exam, Pool pool, Integer quantity)
 	{
-		// TODO
-		return Exam.EMPTY;
+		return this.update(exam.getId( ), pool.getId( ), quantity);
 	}
 	
-	public Exam update (Exam exam, Pool pool)
+	public Exam update(Identificator<Exam> idOfExam, Identificator<Pool> idOfPool,
+            Integer quantity)
+    {
+      Object[] arguments = {
+              ((NumericIdentificator<Exam>)idOfExam).longValue()
+              ,((NumericIdentificator<Pool>)idOfPool).longValue()
+              ,quantity
+      };
+      try
+      {
+          return this.getDataAccess( ).store("{CALL exam_update_pool_add (?, ?, ?)}", arguments);
+      } catch (DataAccessException e)
+      {
+          throw new ExamFactoryException (e);
+      } finally {
+          return Exam.EMPTY;
+      }
+    }
+
+    public Exam update (Exam exam, Pool pool)
 	{
-		// TODO
-		return Exam.EMPTY;
+		return this.update(exam.getId( ), pool.getId( ));
 	}
 
-	public boolean destroy (Exam exam) 
+	public Exam update(Identificator<Exam> idOfExam, Identificator<Pool> idOfPool)
+    {
+	      Object[] arguments = {
+	              ((NumericIdentificator<Exam>)idOfExam).longValue()
+	              ,((NumericIdentificator<Pool>)idOfPool).longValue()
+	      };
+	      try
+	      {
+	          return this.getDataAccess( ).store("{CALL exam_update_pool_remove (?, ?)}", arguments);
+	      } catch (DataAccessException e)
+	      {
+	          throw new ExamFactoryException (e);
+	      } finally {
+	          return Exam.EMPTY;
+	      }
+    }
+
+    public boolean destroy (Exam exam) 
 	{
 		// TODO Auto-generated method stub
 		return false;

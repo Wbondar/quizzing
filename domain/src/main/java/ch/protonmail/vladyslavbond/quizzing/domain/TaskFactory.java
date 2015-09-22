@@ -3,7 +3,9 @@ package ch.protonmail.vladyslavbond.quizzing.domain;
 import java.util.Collections;
 import java.util.Set;
 
+import ch.protonmail.vladyslavbond.quizzing.datasource.DataAccessException;
 import ch.protonmail.vladyslavbond.quizzing.util.Identificator;
+import ch.protonmail.vladyslavbond.quizzing.util.NumericIdentificator;
 
 public final class TaskFactory 
 extends SimpleFactory<Task>
@@ -17,8 +19,14 @@ implements Factory<Task>
 	@Override
 	public Task getInstance (Identificator<Task> id) 
 	{
-		// TODO
-		return Task.EMPTY;
+		Object[] arguments = {((NumericIdentificator<Task>)id).longValue( )};
+		try
+        {
+            return this.getDataAccess( ).fetch("SELECT * FROM view_task WHERE id = ?", arguments);
+        } catch (DataAccessException e)
+        {
+            throw new TaskFactoryException ("Failed to retrieve task by id.", e);
+        }
 	}
 	
 	public Set<Task> getInstances (Identificator<Pool> idOfPool, int quantityOfTasksToBeFetched)

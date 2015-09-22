@@ -1,7 +1,13 @@
 package ch.protonmail.vladyslavbond.quizzing.domain;
 
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.Set;
 
+import ch.protonmail.vladyslavbond.quizzing.datasource.DataAccess;
+import ch.protonmail.vladyslavbond.quizzing.datasource.DataAccessException;
+import ch.protonmail.vladyslavbond.quizzing.datasource.DataAccessFactory;
 import ch.protonmail.vladyslavbond.quizzing.util.Identificator;
 import ch.protonmail.vladyslavbond.quizzing.util.NumericIdentificator;
 
@@ -16,28 +22,61 @@ implements Factory<Answer>
 	
 	public Answer newInstance (Assessment assessment, Task task, String input)
 	{
-		// TODO
-		Identificator<Answer> id = NumericIdentificator.<Answer>valueOf(Integer.valueOf(assessment.getId( ).toString( ).concat(task.getId( ).toString( ))));
-		return new Answer(id, task, assessment.getStudent( ), input);
+		Object[] arguments = {
+		        ((NumericIdentificator<Assessment>)assessment.getId( )).longValue( )
+		        ,((NumericIdentificator<Task>)task.getId( )).longValue( )
+		        ,input
+		};
+		try
+        {
+            return this.getDataAccess( ).store("{CALL answer_create(?, ?, ?)}", arguments);
+        } catch (DataAccessException e)
+        {
+           throw new AnswerFactoryException (e);
+        }
 	}
 	
-	public ScoredAnswer newInstance (OngoingAssessment assessment, Task task, int reward)
+	public ScoredAnswer newInstance (OngoingAssessment assessment, Task task, String input, int reward)
 	{
-		// TODO
-		Identificator<Answer> id = NumericIdentificator.<Answer>valueOf(Integer.valueOf(assessment.getId( ).toString( ).concat(task.getId( ).toString( ))));
-		return new ScoredAnswer(this.getInstance(id), reward);
+        Object[] arguments = {
+                ((NumericIdentificator<Assessment>)assessment.getId( )).longValue( )
+                ,((NumericIdentificator<Task>)task.getId( )).longValue( )
+                ,input
+                ,reward
+        };
+        try
+        {
+            return (ScoredAnswer)this.getDataAccess( ).store("{CALL answer_scored_create(?, ?, ?, ?)}", new ScoredAnswerMapper( ), arguments);
+        } catch (DataAccessException e)
+        {
+           throw new AnswerFactoryException (e);
+        }
 	}
 	
 	@Override
 	public Answer getInstance (Identificator<Answer> id) 
 	{
-		// TODO
-		return Answer.EMPTY;
+		Object[] arguments = {((NumericIdentificator<Answer>)id).longValue( )};
+		try
+        {
+            return this.getDataAccess( ).fetch("SELECT * FROM view_answer WHERE id = ?;", arguments);
+        } catch (DataAccessException e)
+        {
+            throw new AnswerFactoryException (e);
+        }
 	}
 	
 	public Set<? extends Answer> getInstances (Identificator<Assessment> idOfAssessment)
 	{
-		// TODO
-		return java.util.Collections.<Answer>emptySet( );
+        Object[] arguments = {((NumericIdentificator<Assessment>)idOfAssessment).longValue( )};
+        Set<Answer> answers = new HashSet<Answer> ( );
+        try
+        {
+            answers.addAll(this.getDataAccess( ).fetchAll("SELECT * FROM view_answer WHERE assessment_id = ?", arguments));
+        } catch (DataAccessException e)
+        {
+            throw new AnswerFactoryException (e);
+        }
+        return answers;
 	}
 }

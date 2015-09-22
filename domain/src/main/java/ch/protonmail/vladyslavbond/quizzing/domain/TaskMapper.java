@@ -1,8 +1,8 @@
 package ch.protonmail.vladyslavbond.quizzing.domain;
 
-import ch.protonmail.vladyslavbond.quizzing.datasource.Mapper;
+import ch.protonmail.vladyslavbond.quizzing.datasource.NativeMapper;
 
-class TaskMapper extends Mapper<Task>
+class TaskMapper extends NativeMapper<Task>
 {
     public TaskMapper ( )
     {

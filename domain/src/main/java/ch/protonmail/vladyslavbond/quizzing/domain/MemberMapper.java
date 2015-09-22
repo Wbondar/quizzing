@@ -1,11 +1,11 @@
 package ch.protonmail.vladyslavbond.quizzing.domain;
 
-import ch.protonmail.vladyslavbond.quizzing.datasource.Mapper;
+import ch.protonmail.vladyslavbond.quizzing.datasource.NativeMapper;
 import ch.protonmail.vladyslavbond.quizzing.util.Identificator;
 import ch.protonmail.vladyslavbond.quizzing.util.NumericIdentificator;
 
 class MemberMapper
-extends Mapper<Member>
+extends NativeMapper<Member>
 {
     public MemberMapper ( )
     {

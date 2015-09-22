@@ -2,23 +2,44 @@ package ch.protonmail.vladyslavbond.quizzing.domain;
 
 import java.util.Set;
 
+import ch.protonmail.vladyslavbond.quizzing.util.Identifiable;
+import ch.protonmail.vladyslavbond.quizzing.util.Identificator;
+import ch.protonmail.vladyslavbond.quizzing.util.NumericIdentificator;
+
 public final class Student 
-extends Member 
+implements Party, Identifiable<Student>
 {
 	public final static Student EMPTY = new Student ( );
 	
+    private final String screenName;
+    private final Identificator<Student> id;
+	
 	private Student ( )
 	{
-		super(Member.EMPTY.getId( ), Member.EMPTY.getScreenName( ));
+		this.id         = NumericIdentificator.<Student>valueOf(((NumericIdentificator<Member>)Member.EMPTY.getId( )).longValue( ));
+		this.screenName = Member.EMPTY.getScreenName( );
 	}
 	
 	Student (Member member)
 	{
-		super(member.getId( ), member.getScreenName( ));
+	    this.id = NumericIdentificator.<Student>valueOf(((NumericIdentificator<Member>)member.getId( )).longValue( ));
+		this.screenName = member.getScreenName( );
 	}
 	
 	public final Set<Assessment> getAssessments ( )
 	{
-		return Factories.<AssessmentFactory>getInstance(AssessmentFactory.class).getInstances(super.getId( ));
+		return Factories.<AssessmentFactory>getInstance(AssessmentFactory.class).getInstances(this.id);
 	}
+
+    @Override
+    public String getScreenName()
+    {
+        return this.screenName;
+    }
+
+    @Override
+    public Identificator<Student> getId()
+    {
+        return this.id;
+    }
 }
