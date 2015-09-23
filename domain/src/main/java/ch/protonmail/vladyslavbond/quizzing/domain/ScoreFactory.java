@@ -40,7 +40,7 @@ extends SimpleFactory<Score>
         };
         try
         {
-            return this.getDataAccess( ).fetch("SELECT * FROM view_score WHERE id = ?;", arguments);
+            return this.getDataAccess( ).fetch("SELECT * FROM view_scores WHERE id = ?;", arguments);
         } catch (DataAccessException e)
         {
            throw new ScoreFactoryException (e);
@@ -55,7 +55,7 @@ extends SimpleFactory<Score>
         Set<Score> scores = new HashSet<Score> ( );
         try
         {
-            scores.addAll(this.getDataAccess( ).fetchAll("SELECT * FROM view_score WHERE assessment_id = ?;", arguments));
+            scores.addAll(this.getDataAccess( ).fetchAll("SELECT * FROM view_scores WHERE assessment_id = ?;", arguments));
             return scores;
         } catch (DataAccessException e)
         {

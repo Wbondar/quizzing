@@ -23,23 +23,11 @@ implements Factory<Task>
 		Object[] arguments = {((NumericIdentificator<Task>)id).longValue( )};
 		try
         {
-            return this.getDataAccess( ).fetch("SELECT * FROM view_task WHERE id = ?", arguments);
+            return this.getDataAccess( ).fetch("SELECT * FROM view_tasks WHERE id = ?", arguments);
         } catch (DataAccessException e)
         {
             throw new TaskFactoryException ("Failed to retrieve task by id.", e);
         }
-	}
-	
-	public Set<Task> getInstances (Identificator<Pool> idOfPool, int quantityOfTasksToBeFetched)
-	{
-		// TODO
-		return java.util.Collections.<Task>emptySet( );
-	}
-	
-	public Set<Task> getInstances (Identificator<Pool> idOfPool)
-	{
-		// TODO
-		return java.util.Collections.<Task>emptySet( );
 	}
 
 	public Task update (Instructor updater, Task task, String descriptionOfTask) 
@@ -70,20 +58,38 @@ implements Factory<Task>
 		return false;
 	}
 
-	public Set<Task> getInstances(Exam exam) {
-		// TODO Auto-generated method stub
-		return Collections.<Task>emptySet( );
+	public Set<Task> getInstances(Exam exam) 
+  {
+		return this.getExamInstances(exam.getId( ));
 	}
+
+  Set<Task> getExamInstances (Identificator<Exam> idOfExam)
+  {
+    // TODO The following code is just a placeholder!
+      Object[] arguments = {
+                ((NumericIdentificator<Exam>)idOfExam).longValue( )
+      };
+      Set<Task> tasks = new HashSet<Task> ( );
+      try
+      {
+          tasks.addAll(getDataAccess( ).fetchAll("SELECT * FROM view_tasks;", arguments));
+          return tasks;
+      } catch (DataAccessException e) {
+          throw new TaskFactoryException ("Failed to fetch tasks by exam.", e);
+      } finally {
+          return tasks;
+      }
+  }
 	
     Set<Task> getAssessmentInstances (long id)
 	{
         Set<Task> tasks = new HashSet<Task> ( );
         try
         {
-            tasks.addAll(getDataAccess( ).fetchAll("SELECT * FROM view_assessment_task WHERE assessment_id = ?;", id));
+            tasks.addAll(getDataAccess( ).fetchAll("SELECT * FROM view_assessment_tasks WHERE assessment_id = ?;", id));
             return tasks;
         } catch (DataAccessException e) {
-            throw new TaskFactoryException ("Failed to create new task.", e);
+            throw new TaskFactoryException ("Failed to fetch tasks by assessment.", e);
         } finally {
             return tasks;
         }
@@ -115,5 +121,12 @@ implements Factory<Task>
     public Set<Task> getFinishedAssessmentInstances(Identificator<FinishedAssessment> id)
     {
         return this.getAssessmentInstances(((NumericIdentificator<FinishedAssessment>)id).longValue( ));
+    }
+
+    public Set<Task> getInstances(Identificator<Pool> id,
+            int quantityOfTasksToBeFetched)
+    {
+        // TODO Auto-generated method stub
+        return this.getInstances(Exam.EMPTY);
     }
 }

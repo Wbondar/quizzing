@@ -41,7 +41,7 @@ implements Factory<Pool>
         Set<Pool> pools = new HashSet<Pool> ( );
         try
         {
-            pools.addAll(this.getDataAccess( ).fetchAll("SELECT * FROM view_pools WHERE exam_id = ?;", arguments));
+            pools.addAll(this.getDataAccess( ).fetchAll("SELECT * FROM view_exam_pools WHERE exam_id = ?;", arguments));
         } catch (DataAccessException e)
         {
             throw new PoolFactoryException (e);

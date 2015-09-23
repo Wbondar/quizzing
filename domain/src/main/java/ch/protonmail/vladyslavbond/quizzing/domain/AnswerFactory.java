@@ -38,7 +38,7 @@ implements Factory<Answer>
 		Object[] arguments = {((NumericIdentificator<Answer>)id).longValue( )};
 		try
         {
-            return this.getDataAccess( ).fetch("SELECT * FROM view_answer WHERE id = ?;", arguments);
+            return this.getDataAccess( ).fetch("SELECT * FROM view_answers WHERE id = ?;", arguments);
         } catch (DataAccessException e)
         {
             throw new AnswerFactoryException (e);
@@ -50,7 +50,8 @@ implements Factory<Answer>
         Set<Answer> answers = new HashSet<Answer> ( );
         try
         {
-            answers.addAll(this.getDataAccess( ).fetchAll("SELECT * FROM view_answer WHERE assessment_id = ?;", id));
+            answers.addAll(this.getDataAccess( ).fetchAll("SELECT * FROM view_answers WHERE assessment_id = ?;", id));
+            return answers;
         } catch (DataAccessException e)
         {
             throw new AnswerFactoryException (e);
