@@ -26,9 +26,9 @@ implements Party, Identifiable<Student>
 		this.screenName = member.getScreenName( );
 	}
 	
-	public final Set<Assessment> getAssessments ( )
+	public final Set<FinishedAssessment> getAssessments ( )
 	{
-		return Factories.<AssessmentFactory>getInstance(AssessmentFactory.class).getInstances(this.id);
+		return Factories.<FinishedAssessmentFactory>getInstance(FinishedAssessmentFactory.class).getInstances(this.id);
 	}
 
     @Override

@@ -1,19 +1,29 @@
 package ch.protonmail.vladyslavbond.quizzing.controllers;
 
 import ch.protonmail.vladyslavbond.quizzing.domain.*;
+import ch.protonmail.vladyslavbond.quizzing.util.Identificator;
 
 public final class Pools 
 extends Controller 
 {
-    public Result create (String titleOfPool) 
+    public Pool create (Instructor instructor, String titleOfPool) 
     {
-        PoolFactory poolFactory = Factories.<PoolFactory>getInstance(PoolFactory.class);
-        Pool pool = poolFactory.newInstance(titleOfPool);
+        Pool pool = getPoolFactory( ).newInstance(instructor.getId( ), titleOfPool);
         if (pool == null || pool.equals(Pool.EMPTY))
         {
-            return badRequest("Failure.");
+            return Pool.EMPTY;
         }
-        return this.read(pool);
+        return pool;
+    }
+    
+    private InstructorFactory getInstructorFactory ( )
+    {
+        return Factories.<InstructorFactory>getInstance(InstructorFactory.class);
+    }
+    
+    public Pool create (Identificator<Instructor> idOfInstructor, String titleOfPool)
+    {
+        return this.create(getInstructorFactory( ).getInstance(idOfInstructor), titleOfPool);
     }
     
     public Result read (Pool pool) 
@@ -36,36 +46,38 @@ extends Controller
         return this.read(pool);
     }
     
-    public Result updateTaskAdd (Pool pool, Task task) 
+    public Pool updateTaskAdd (Pool pool, Task task) 
     {
-        PoolFactory poolFactory = Factories.<PoolFactory>getInstance(PoolFactory.class);
-        pool = poolFactory.update(pool, task, true);
+        pool = getPoolFactory( ).update(pool, task, true);
         if (pool == null || pool.equals(Pool.EMPTY))
         {
-            return badRequest("Failure.");
+            return Pool.EMPTY;
         }
-        return this.read(pool);
+        return pool;
     }
     
-    public Result updateTaskRemove (Pool pool, Task task) 
+    public Pool updateTaskRemove (Pool pool, Task task) 
     {
-        PoolFactory poolFactory = Factories.<PoolFactory>getInstance(PoolFactory.class);
-        pool = poolFactory.update(pool, task, false);
+        pool = getPoolFactory( ).update(pool, task, false);
         if (pool == null || pool.equals(Pool.EMPTY))
         {
-            return badRequest("Failure.");
+            return Pool.EMPTY;
         }
-        return this.read(pool);
+        return pool;
     }
     
-    public Result destroy (Pool pool) 
+    private final PoolFactory getPoolFactory ( )
     {
-        PoolFactory poolFactory = Factories.<PoolFactory>getInstance(PoolFactory.class);
-        boolean success = poolFactory.destroy(pool);
-        if (!success)
-        {
-            return badRequest("Failure.");
-        }
-        return ok("Success.");
+        return Factories.<PoolFactory>getInstance(PoolFactory.class);
+    }
+    
+    private final TaskFactory getTaskFactory ( )
+    {
+        return Factories.<TaskFactory>getInstance(TaskFactory.class);
+    }
+
+    public Pool updateTaskAdd (Identificator<Pool> idOfPool, Identificator<Task> id)
+    {
+        return updateTaskAdd(getPoolFactory( ).getInstance(idOfPool), getTaskFactory( ).getInstance(id));
     }
 }

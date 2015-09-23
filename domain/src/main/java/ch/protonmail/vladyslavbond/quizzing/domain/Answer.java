@@ -2,6 +2,16 @@ package ch.protonmail.vladyslavbond.quizzing.domain;
 
 import ch.protonmail.vladyslavbond.quizzing.util.*;
 
+/**
+ * Represents single input provided by a student 
+ * to a task in a particular assessment.
+ * One task may have one or more answers associated with it
+ * by the same student in the same assessment.
+ * In multiple choice type of tasks that is particularly the case.
+ * @author Vladyslav Bondarenko
+ *
+ */
+
 public class Answer 
 implements Identifiable<Answer>
 {

@@ -1,14 +1,15 @@
 package ch.protonmail.vladyslavbond.quizzing.controllers;
 
 import ch.protonmail.vladyslavbond.quizzing.domain.*;
+import ch.protonmail.vladyslavbond.quizzing.util.Identificator;
 
 public final class Exams 
 extends Controller 
 {
-	public Result create (String titleOfExam)
+	public Result create (Identificator<Instructor> idOfInstructor, String titleOfExam)
 	{
 		ExamFactory examFactory = Factories.<ExamFactory>getInstance(ExamFactory.class);
-		Exam exam = examFactory.newInstance(titleOfExam);
+		Exam exam = examFactory.newInstance(idOfInstructor, titleOfExam);
 		if (exam == null || exam.equals(Exam.EMPTY))
 		{
 			return badRequest("Failure.");

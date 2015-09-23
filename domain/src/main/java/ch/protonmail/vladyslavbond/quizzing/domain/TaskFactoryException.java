@@ -12,4 +12,9 @@ extends FactoryException
     {
         super(message, e);
     }
+
+    public TaskFactoryException (Throwable e)
+    {
+        super(e);
+    }
 }

@@ -72,7 +72,7 @@ implements Factory<Pool>
 		return this.update(pool.getId( ), titleOfPool);
 	}
 
-	private Pool update(Identificator<Pool> id, String titleOfPool)
+    private Pool update(Identificator<Pool> id, String titleOfPool)
     {
         Object[] arguments = {
                 ((NumericIdentificator<Pool>)id).longValue()

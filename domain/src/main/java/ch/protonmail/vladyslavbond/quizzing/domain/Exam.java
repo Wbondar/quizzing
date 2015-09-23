@@ -33,11 +33,6 @@ implements Identifiable<Exam>
 		return Factories.<TaskFactory>getInstance(TaskFactory.class).getInstances(this);
 	}
 	
-	public OngoingAssessment beginAssessmentFor (Student student)
-	{
-		return Factories.<AssessmentFactory>getInstance(AssessmentFactory.class).newInstance(student, this);
-	}
-	
 	private final String title;
 	
 	public String getTitle ( )

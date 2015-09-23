@@ -1,56 +1,78 @@
 package ch.protonmail.vladyslavbond.quizzing.controllers;
 
 import ch.protonmail.vladyslavbond.quizzing.domain.*;
+import ch.protonmail.vladyslavbond.quizzing.util.Identificator;
+import ch.protonmail.vladyslavbond.quizzing.util.NumericIdentificator;
 
 public class Options 
 extends Controller 
 {
-    public Result create (Task task, String messageOfOption, Integer reward) 
+    public Option create (Task task, String messageOfOption, Integer reward) 
     {
         OptionFactory optionFactory = Factories.<OptionFactory>getInstance(OptionFactory.class);
         Option option = optionFactory.newInstance(task, messageOfOption, reward);
         if (option == null || option.equals(Option.EMPTY))
         {
-            return badRequest("Failure.");
+            return Option.EMPTY;
         }
-        return this.read(option);
+        return option;
     }
     
-    public Result read (Option option) 
+    public Option retrieve (Identificator<Option> id) 
     {
+        Option option = getOptionFactory( ).getInstance(id);
         if (option == null || option.equals(Option.EMPTY))
         {
-            return badRequest("Failure.");
+            return Option.EMPTY;
         }
-        return ok(option.getMessage( ));
+        return option;
     }
     
-    public Result update (Option option, String messageOfOption, Integer reward) 
+    private OptionFactory getOptionFactory()
     {
-        OptionFactory optionFactory = Factories.<OptionFactory>getInstance(OptionFactory.class);
+        return Factories.<OptionFactory>getInstance(OptionFactory.class);
+    }
+
+    public Option update (Identificator<Option> id, String messageOfOption, Integer reward) 
+    {
+        Option option = getOptionFactory( ).getInstance(id);
         if (messageOfOption != null && !messageOfOption.isEmpty( ))
         {
-            option = optionFactory.update(option, messageOfOption);
+            option = getOptionFactory( ).update(option, messageOfOption);
         }
         if (reward != null)
         {
-            option = optionFactory.update(option, reward);
+            option = getOptionFactory( ).update(option, reward);
         }
         if (option == null || option.equals(Option.EMPTY))
         {
-            return badRequest("Failure.");
+            return Option.EMPTY;
         }
-        return this.read(option);
+        return option;
     }
     
-    public Result destroy (Option option) 
+    public boolean destroy (Identificator<Option> id) 
     {
-        OptionFactory optionFactory = Factories.<OptionFactory>getInstance(OptionFactory.class);
-        boolean success = optionFactory.destroy(option);
-        if (!success)
-        {
-            return badRequest("Failure.");
-        }
-        return ok("Success.");
+        return this.destroy(getOptionFactory( ).getInstance(id));
+    }
+
+    private boolean destroy(Option instance)
+    {
+        return getOptionFactory( ).destroy(instance);
+    }
+
+    public Option create(Long idOfTask, String messageOfOption, Integer reward)
+    {
+        return this.create(NumericIdentificator.<Task>valueOf(idOfTask), messageOfOption, reward);
+    }
+
+    private TaskFactory getTaskFactory()
+    {
+        return Factories.<TaskFactory>getInstance(TaskFactory.class);
+    }
+
+    private Option create(Identificator<Task> idOfTask, String messageOfOption, Integer reward)
+    {
+        return this.create(getTaskFactory( ).getInstance(idOfTask), messageOfOption, reward);
     }
 }

@@ -38,26 +38,4 @@ implements Factory<Member>
             throw new MemberFactoryException ("Failed to get member by identificator.", e);
         }
 	}
-	
-	public Student getStudent (Member member)
-	{
-		// TODO Check if optimized
-		return new Student (member);
-	}
-	
-	public Instructor getInstructor (Member member)
-	{
-		// TODO Check if optimized 
-		return new Instructor (member);
-	}
-
-    public Student getStudent(Identificator<Member> idOfStudent)
-    {
-        return getStudent(getInstance(idOfStudent));
-    }
-
-    public Instructor getInstructor (Identificator<Member> idOfInstructor)
-    {
-        return getInstructor(getInstance(idOfInstructor));
-    }
 }

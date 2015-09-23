@@ -12,22 +12,22 @@ public class DataAccess<T>
 extends Object
 {
 	private final StatementFactory statementFactory;
-    private final Class<? extends T>         typeOfEntities;
-    private final Mapper<? extends T>        defaultMapper;
+    private final Class<T>         typeOfEntities;
+    private final Mapper<T>        defaultMapper;
 
-	DataAccess (StatementFactory statementFactory, Class<T> typeOfEntities, Mapper<? extends T> defaultMapper)
+	DataAccess (StatementFactory statementFactory, Class<T> typeOfEntities, Mapper<T> defaultMapper)
 	{
 		this.statementFactory = statementFactory;
 		this.typeOfEntities   = typeOfEntities;
 		this.defaultMapper    = defaultMapper;
 	}
 	
-	private final Mapper<? extends T> getDefaultMapper ( ) 
+	private final Mapper<T> getDefaultMapper ( ) 
 	{
         return defaultMapper;
 	}
 	
-	private final Collection<? extends T> processResultSet (ResultSet resultSet, Mapper<? extends T> mapper) 
+	private final Collection<T> processResultSet (ResultSet resultSet, Mapper<T> mapper) 
 	        throws SQLException
     {
         ResultSetMetaData resultSetMetaData = resultSet.getMetaData();
@@ -57,13 +57,13 @@ extends Object
         return entities;
     }
 
-    private final Collection<? extends T> processResultSet(ResultSet resultSet) 
+    private final Collection<T> processResultSet(ResultSet resultSet) 
             throws SQLException
     {
         return this.processResultSet(resultSet, this.getDefaultMapper( ));
     }
 
-    public final Collection<? extends T> fetchAll (String sql, NativeMapper<T> mapper, Object... values)
+    public final Collection<T> fetchAll (String sql, NativeMapper<T> mapper, Object... values)
     throws DataAccessException
     {
         try
@@ -75,13 +75,13 @@ extends Object
         }
     }
 
-    public final Collection<? extends T> fetchAll (String sql, Object... values) 
+    public final Collection<T> fetchAll (String sql, Object... values) 
 	        throws DataAccessException
 	{
 	    return this.fetchAll(sql, getDefaultMapper( ), values);
 	}
 	
-	public final Collection<? extends T> fetchAll (String sql) 
+	public final Collection<T> fetchAll (String sql) 
 	        throws DataAccessException
 	{
 	    return fetchAll(sql, new Object[0]);
@@ -99,7 +99,7 @@ extends Object
         return fetch(sql, new Object[0]);
     }
 
-    public final Collection<? extends T> storeAll (String sql, Object... arguments) 
+    public final Collection<T> storeAll (String sql, Object... arguments) 
             throws DataAccessException
     {
          try

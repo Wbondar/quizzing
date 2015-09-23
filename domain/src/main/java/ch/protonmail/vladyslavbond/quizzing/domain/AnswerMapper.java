@@ -19,9 +19,9 @@ extends NativeMapper<Answer>
         final TaskFactory taskFactory = Factories.<TaskFactory>getInstance(TaskFactory.class);
         final Identificator<Task> idOfTask = NumericIdentificator.<Task>valueOf(get("task_id", Long.class));
         final Task task = taskFactory.getInstance(idOfTask);
-        final MemberFactory memberFactory = Factories.<MemberFactory>getInstance(MemberFactory.class);
-        final Identificator<Member> idOfStudent = NumericIdentificator.<Member>valueOf(get("member_id", Long.class));
-        final Student student = memberFactory.getStudent(idOfStudent);
+        final StudentFactory studentFactory = Factories.<StudentFactory>getInstance(StudentFactory.class);
+        final Identificator<Student> idOfStudent = NumericIdentificator.<Student>valueOf(get("member_id", Long.class));
+        final Student student = studentFactory.getInstance(idOfStudent);
         final String input = get("input", String.class);
         return new Answer (NumericIdentificator.<Answer>valueOf(id), task, student, input);
     }

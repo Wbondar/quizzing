@@ -8,7 +8,6 @@
   </parent>
     <groupId>ch.protonmail.vladyslavbond.quizzing</groupId>
     <artifactId>domain</artifactId>
-    <version>1.0-SNAPSHOT</version>
     <name>domain</name>
     <dependencies>
         <dependency>

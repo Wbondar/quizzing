@@ -1,49 +1,59 @@
 package ch.protonmail.vladyslavbond.quizzing.controllers;
 
 import ch.protonmail.vladyslavbond.quizzing.domain.*;
+import ch.protonmail.vladyslavbond.quizzing.util.Identificator;
+import ch.protonmail.vladyslavbond.quizzing.util.NumericIdentificator;
 
 public class Tasks 
 extends Controller 
-{
-    public Result create (String descriptionOfTask, Integer idOfTaskType) 
+{   
+    private TaskFactory getTaskFactory ( )
     {
-        TaskFactory taskFactory = Factories.<TaskFactory>getInstance(TaskFactory.class);
-        Task task = taskFactory.newInstance(descriptionOfTask, idOfTaskType);
-        if (task.equals(Task.EMPTY) || task == null)
+        return Factories.<TaskFactory>getInstance(TaskFactory.class);
+    }
+
+    public Task create(Identificator<Instructor> idOfInstructor, Integer idOfTaskType, String description)
+    {
+        return create(idOfInstructor, TaskType.valueOf(idOfTaskType), description);
+    }
+
+    public Task create(Identificator<Instructor> idOfInstructor, TaskType taskType, String description)
+    {
+        return getTaskFactory( ).newInstance(idOfInstructor, taskType, description);
+    }
+
+    public Task retrieve(Long idOfTask)
+    {
+        return this.retrieve(NumericIdentificator.<Task>valueOf(idOfTask));
+    }
+
+    public Task retrieve(Identificator<Task> id)
+    {
+        Task task = getTaskFactory( ).getInstance(id);
+        if (task == null || task.equals(Task.EMPTY))
         {
-            return badRequest("Failure.");
+            return Task.EMPTY;
         }
-        return this.read(task);
+        return task;
     }
     
-    public Result read (Task task) 
+    private InstructorFactory getInstructorFactory ( )
     {
-        if (task.equals(Task.EMPTY) || task == null)
-        {
-            return badRequest("Failure.");
-        }
-        return ok(task.getDescription( ));
+        return Factories.<InstructorFactory>getInstance(InstructorFactory.class);
     }
     
-    public Result update (Task task, String descriptionOfTask) 
+    public Task update (Identificator<Instructor> idOfInstructor, Identificator<Task> idOfTask, String newDescription)
     {
-        TaskFactory taskFactory = Factories.<TaskFactory>getInstance(TaskFactory.class);
-        task = taskFactory.update(task, descriptionOfTask);
-        if (task.equals(Task.EMPTY) || task == null)
-        {
-            return badRequest("Failure.");
-        }
-        return this.read(task);
+        return this.update(getInstructorFactory( ).getInstance(idOfInstructor), getTaskFactory( ).getInstance(idOfTask), newDescription);
     }
-    
-    public Result destroy (Task task) 
+
+    public Task update (Instructor instructor, Task task, String newDescription)
     {
-        TaskFactory taskFactory = Factories.<TaskFactory>getInstance(TaskFactory.class);
-        boolean success = taskFactory.destroy(task);
-        if (!success)
+        task = getTaskFactory( ).update(instructor, task, newDescription);
+        if (task == null || task.equals(Task.EMPTY))
         {
-            return badRequest("Failure.");
+            return Task.EMPTY;
         }
-        return ok("Success.");
+        return task;
     }
 }
