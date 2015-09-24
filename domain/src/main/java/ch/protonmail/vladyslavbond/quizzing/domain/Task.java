@@ -1,5 +1,6 @@
 package ch.protonmail.vladyslavbond.quizzing.domain;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.Collections;
 import java.util.Set;
 
@@ -20,15 +21,15 @@ implements Identifiable<Task>
 		this.options     = Collections.<Option>emptySet( );
 	}
 	
-	Task (Identificator<Task> id, RewardCalculator calculator, String description, Set<Option> options)
+	Task (Identificator<Task> id, Class<? extends RewardCalculator> typeOfCalculator, String description, Set<Option> options) throws InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException
 	{
 		this.id          = id;
-		this.calculator  = calculator;
+		this.calculator  = typeOfCalculator.getDeclaredConstructor(Task.class).newInstance(this);
 		this.description = description;
 		this.options     = Collections.<Option>unmodifiableSet(options);
 	}
 	
-	Task (Identificator<Task> id, RewardCalculator calculator, String description)
+	Task (Identificator<Task> id, Class<? extends RewardCalculator> calculator, String description) throws InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException
 	{
 		this(id, calculator, description, Collections.<Option>emptySet( ));
 	}
@@ -100,6 +101,10 @@ implements Identifiable<Task>
 		{
 			return false;
 		}
+		if (o == this)
+		{
+		    return true;
+		}
 		if (o instanceof Task)
 		{
 			return o.hashCode( ) == this.hashCode( );
@@ -110,6 +115,6 @@ implements Identifiable<Task>
 	@Override
 	public final int hashCode ( )
 	{
-		return this.id.hashCode( ) + this.calculator.hashCode( ) + this.description.hashCode( ) + this.options.hashCode( );
+		return this.id.hashCode( ) + this.calculator.getId( ).toNumber( ).intValue( ) + this.description.hashCode( ) + this.options.hashCode( );
 	}
 }

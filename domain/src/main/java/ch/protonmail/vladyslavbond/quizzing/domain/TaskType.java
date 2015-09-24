@@ -7,29 +7,33 @@ import ch.protonmail.vladyslavbond.quizzing.util.NumericIdentificator;
 public enum TaskType
 implements Identifiable<TaskType>
 {
-      ChoiceMultiple (1)
-    , ChoiceSingle (2)
-    , Guess (3)
-    , WrittenCommunication (4)
+      ChoiceMultiple (1, ChoiceMultipleRewardCalculator.class)
+    , ChoiceSingle (2, ChoiceSingleRewardCalculator.class)
+    , Guess (3, GuessRewardCalculator.class)
+    , WrittenCommunication (4, WrittenCommunicationRewardCalculator.class)
     ;
       
     private final Identificator<TaskType> id;
+    private final Class<? extends RewardCalculator> typeOfRewardCalculator;
 
-    private TaskType (Identificator<TaskType> id)
+    private TaskType (Identificator<TaskType> id, Class<? extends RewardCalculator> typeOfRewardCalculator)
     {
         this.id = id;
+        this.typeOfRewardCalculator = typeOfRewardCalculator;
     }
       
-    private TaskType (int id)
+    private TaskType (int id, Class<? extends RewardCalculator> typeOfRewardCalculator)
     {
-        this(NumericIdentificator.<TaskType>valueOf(id));
+        this(NumericIdentificator.<TaskType>valueOf(id), typeOfRewardCalculator);
     }
     
     public static final TaskType valueOf (Identificator<TaskType> id)
     {
         for (TaskType taskType : TaskType.values( ))
         {
-            if (taskType.getId( ).equals(id))
+            int value = ((NumericIdentificator<TaskType>)taskType.getId( )).intValue( );
+            int idValue = ((NumericIdentificator<TaskType>)id).intValue( );
+            if (value == idValue)
             {
                 return taskType;
             }
@@ -46,5 +50,10 @@ implements Identifiable<TaskType>
     public Identificator<TaskType> getId ( )
     {
         return this.id;
+    }
+
+    public Class<? extends RewardCalculator> getTypeOfRewardCalculator()
+    {
+        return this.typeOfRewardCalculator;
     }
 }

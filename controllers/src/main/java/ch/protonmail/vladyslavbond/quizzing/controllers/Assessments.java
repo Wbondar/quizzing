@@ -3,63 +3,93 @@ package ch.protonmail.vladyslavbond.quizzing.controllers;
 import ch.protonmail.vladyslavbond.quizzing.domain.*;
 import ch.protonmail.vladyslavbond.quizzing.util.Identificator;
 import ch.protonmail.vladyslavbond.quizzing.util.NumericIdentificator;
-import ch.protonmail.vladyslavbond.quizzing.domain.Assessment;
 
 public final class Assessments 
 extends Controller 
 {   
-    public Assessment retrieve (Long idOfAssessment) 
+    public Assessment retrieve (Long idOfAssessment) throws AssessmentsControllerException 
     {
-        Assessment assessment = getFinishedAssessmentFactory( ).getInstance(NumericIdentificator.<FinishedAssessment>valueOf(idOfAssessment));
-        if (assessment == null || assessment.equals(FinishedAssessment.EMPTY) || assessment.equals(OngoingAssessment.EMPTY))
+        try
         {
-            assessment = getOngoingAssessmentFactory( ).getInstance(NumericIdentificator.<OngoingAssessment>valueOf(idOfAssessment));
+            Assessment assessment = getFinishedAssessmentFactory( ).getInstance(NumericIdentificator.<FinishedAssessment>valueOf(idOfAssessment));
+            if (assessment == null || assessment.equals(FinishedAssessment.EMPTY) || assessment.equals(OngoingAssessment.EMPTY))
+            {
+                assessment = getOngoingAssessmentFactory( ).getInstance(NumericIdentificator.<OngoingAssessment>valueOf(idOfAssessment));
+            }
+            if (assessment == null || assessment.equals(FinishedAssessment.EMPTY) || assessment.equals(OngoingAssessment.EMPTY))
+            {
+                return FinishedAssessment.EMPTY;
+            }
+            return assessment;
+        } catch (AssessmentFactoryException e) {
+            throw new AssessmentsControllerException (e);
         }
-        if (assessment == null || assessment.equals(FinishedAssessment.EMPTY) || assessment.equals(OngoingAssessment.EMPTY))
-        {
-            return FinishedAssessment.EMPTY;
-        }
-        return assessment;
     }
 
-    private OngoingAssessment update (OngoingAssessment assessment, Task task, String answer)
+    private OngoingAssessment update (OngoingAssessment assessment, Task task, String answer) throws AssessmentsControllerException
     {
-        Answer result = assessment.provideAnswer(task.getId( ), answer);
-        if (result == null || result.equals(Answer.EMPTY))
+        try
         {
-            return OngoingAssessment.EMPTY;
+            Answer result = assessment.provideAnswer(task.getId( ), answer);
+            if (result == null || result.equals(Answer.EMPTY))
+            {
+                return OngoingAssessment.EMPTY;
+            }
+            return assessment;   
+        } catch (AnswerFactoryException | TaskFactoryException e) {
+            throw new AssessmentsControllerException (e);
         }
-        return assessment;
     }
     
-    public OngoingAssessment update (Assessment assessment, Task task, String answer) 
+    public OngoingAssessment update (Assessment assessment, Task task, String answer) throws AssessmentsControllerException
     {
         return this.update((OngoingAssessment)assessment, task, answer);
     }
 
-    public OngoingAssessment create (Identificator<Student> idOfStudent, Identificator<Exam> idOfExam)
+    public OngoingAssessment create (Identificator<Student> idOfStudent, Identificator<Exam> idOfExam) throws AssessmentsControllerException
     {
-        return this.create(getStudentFactory( ).getInstance(idOfStudent), getExamFactory( ).getInstance(idOfExam));
-    }
-
-    private OngoingAssessment create(Student student, Exam exam)
-    {
-        OngoingAssessment assessment = getOngoingAssessmentFactory( ).newInstance(student, exam);
-        if (assessment == null || assessment.equals(OngoingAssessment.EMPTY))
+        try
         {
-            return OngoingAssessment.EMPTY;
+            return this.create(getStudentFactory( ).getInstance(idOfStudent), getExamFactory( ).getInstance(idOfExam));
+        } catch (StudentFactoryException e)
+        {
+            throw new AssessmentsControllerException (e);
         }
-        return assessment;
     }
 
-    public OngoingAssessment update(Long idOfAssessment, Long idOfTask, String input)
+    private OngoingAssessment create(Student student, Exam exam) throws AssessmentsControllerException
+    {
+        try
+        {
+            OngoingAssessment assessment = getOngoingAssessmentFactory( ).newInstance(student, exam);
+            if (assessment == null || assessment.equals(OngoingAssessment.EMPTY))
+            {
+                return OngoingAssessment.EMPTY;
+            }
+            return assessment;
+        } catch (AssessmentFactoryException e)
+        {
+            throw new AssessmentsControllerException (e);
+        }
+    }
+
+    public OngoingAssessment update(Long idOfAssessment, Long idOfTask, String input) throws AssessmentsControllerException
     {
         return this.update(NumericIdentificator.<OngoingAssessment>valueOf(idOfAssessment), NumericIdentificator.<Task>valueOf(idOfTask), input);
     }
 
-    private OngoingAssessment update(Identificator<OngoingAssessment> id, Identificator<Task> idOfTask, String input)
+    private OngoingAssessment update(Identificator<OngoingAssessment> id, Identificator<Task> idOfTask, String input) throws AssessmentsControllerException
     {
-        return this.update(getOngoingAssessmentFactory( ).getInstance(id), getTaskFactory( ).getInstance(idOfTask), input);
+        try
+        {
+            return this.update(getOngoingAssessmentFactory( ).getInstance(id), getTaskFactory( ).getInstance(idOfTask), input);
+        } catch (AssessmentFactoryException e)
+        {
+            throw new AssessmentsControllerException (e);
+        } catch (TaskFactoryException e)
+        {
+            throw new AssessmentsControllerException (e);
+        }
     }
 
     private TaskFactory getTaskFactory()
@@ -67,14 +97,20 @@ extends Controller
         return Factories.<TaskFactory>getInstance(TaskFactory.class);
     }
 
-    public boolean destroy(Long idOfAssessment)
+    public boolean destroy(Long idOfAssessment) throws AssessmentsControllerException
     {
         return this.destroy(NumericIdentificator.<FinishedAssessment>valueOf(idOfAssessment));
     }
 
-    private boolean destroy(Identificator<FinishedAssessment> id)
+    private boolean destroy(Identificator<FinishedAssessment> id) throws AssessmentsControllerException
     {
-        return this.destroy(getFinishedAssessmentFactory().getInstance(id));
+        try
+        {
+            return this.destroy(getFinishedAssessmentFactory().getInstance(id));
+        } catch (AssessmentFactoryException e)
+        {
+            throw new AssessmentsControllerException (e);
+        }
     }
     
     public boolean destroy (FinishedAssessment assessment) 
@@ -83,19 +119,31 @@ extends Controller
         return assessmentFactory.destroy(assessment);
     }
 
-    public boolean finish(Long idOfAssessment)
+    public boolean finish(Long idOfAssessment) throws AssessmentsControllerException
     {
         return this.finish(NumericIdentificator.<OngoingAssessment>valueOf(idOfAssessment));
     }
 
-    private boolean finish(Identificator<OngoingAssessment> id)
+    private boolean finish(Identificator<OngoingAssessment> id) throws AssessmentsControllerException
     {
-        return this.finish (getOngoingAssessmentFactory( ).getInstance(id));
+        try
+        {
+            return this.finish (getOngoingAssessmentFactory( ).getInstance(id));
+        } catch (AssessmentFactoryException e)
+        {
+            throw new AssessmentsControllerException (e);
+        }
     }
 
-    private boolean finish (OngoingAssessment instance)
+    private boolean finish (OngoingAssessment instance) throws AssessmentsControllerException
     {
-        instance.finish( );
+        try
+        {
+            instance.finish( );
+        } catch (FactoryException e)
+        {
+            throw new AssessmentsControllerException (e);
+        }
         return true;
     }
 

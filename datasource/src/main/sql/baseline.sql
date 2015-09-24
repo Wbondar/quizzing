@@ -53,10 +53,13 @@ CREATE TABLE task_types
 )
 ;
 
+Insert into task_types (screen_title) VALUES ('ChoiceMultiple'), ('ChoiceSingle'), ('Guess'), ('WrittenCommunication')
+;
+
 CREATE TABLE tasks 
 (
 	  id          SERIAL    NOT NULL PRIMARY KEY
-	, type_id     INTEGER   NOT NULL
+	, type_id     SMALLINT  NOT NULL
 	, creator_id  INTEGER   NOT NULL 
 	, description TEXT      NOT NULL
 	, created_at  TIMESTAMP NOT NULL
@@ -72,7 +75,7 @@ CREATE TABLE tasks
 CREATE TYPE task AS
 (
 	  id          INTEGER
-	, type_id     INTEGER
+	, type_id     SMALLINT
 	, description TEXT
 )
 ;
@@ -81,7 +84,7 @@ CREATE VIEW view_tasks AS
 SELECT id, type_id, description FROM tasks
 ;
 
-CREATE FUNCTION task_create (member_id INTEGER, type_id INTEGER, description TEXT)
+CREATE FUNCTION task_create (member_id INTEGER, type_id SMALLINT, description TEXT)
 RETURNS task AS
 $$
 INSERT INTO tasks (id, type_id, description, creator_id, created_at)
@@ -93,14 +96,15 @@ LANGUAGE SQL
 STRICT
 ;
 
-CREATE FUNCTION task_update (member_id INTEGER, task_id INTEGER, description TEXT)
+CREATE FUNCTION task_update (arg_member_id INTEGER, arg_task_id INTEGER, arg_description TEXT)
 RETURNS task AS
 $$
 UPDATE tasks 
-SET description = description
-WHERE id = task_id
+SET description = arg_description
+WHERE id = arg_task_id
 ;
 SELECT * FROM view_tasks
+where id = arg_task_id
 ;
 $$
 LANGUAGE SQL

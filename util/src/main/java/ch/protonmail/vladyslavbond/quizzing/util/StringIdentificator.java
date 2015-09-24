@@ -26,4 +26,10 @@ implements Identificator<T>
 	{
 		return o.toString( ).equals(this.toString( ));
 	}
+    
+    @Override
+    public final NumericIdentificator<T> toNumber ( )
+    {
+        return NumericIdentificator.<T>valueOf(this.toString( ));
+    }
 }

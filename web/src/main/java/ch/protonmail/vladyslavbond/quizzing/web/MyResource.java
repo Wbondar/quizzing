@@ -11,43 +11,43 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.FormParam;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
 import ch.protonmail.vladyslavbond.quizzing.controllers.Assessments;
+import ch.protonmail.vladyslavbond.quizzing.controllers.AssessmentsControllerException;
+import ch.protonmail.vladyslavbond.quizzing.controllers.ControllerException;
 import ch.protonmail.vladyslavbond.quizzing.controllers.Controllers;
 import ch.protonmail.vladyslavbond.quizzing.controllers.Options;
+import ch.protonmail.vladyslavbond.quizzing.controllers.OptionsControllerException;
 import ch.protonmail.vladyslavbond.quizzing.controllers.Pools;
 import ch.protonmail.vladyslavbond.quizzing.controllers.Tasks;
-import ch.protonmail.vladyslavbond.quizzing.domain.Answer;
-import ch.protonmail.vladyslavbond.quizzing.domain.Assessment;
-import ch.protonmail.vladyslavbond.quizzing.domain.Exam;
-import ch.protonmail.vladyslavbond.quizzing.domain.FinishedAssessment;
-import ch.protonmail.vladyslavbond.quizzing.domain.OngoingAssessment;
-import ch.protonmail.vladyslavbond.quizzing.domain.Option;
-import ch.protonmail.vladyslavbond.quizzing.domain.Pool;
-import ch.protonmail.vladyslavbond.quizzing.domain.Score;
-import ch.protonmail.vladyslavbond.quizzing.domain.Student;
-import ch.protonmail.vladyslavbond.quizzing.domain.Task;
-import ch.protonmail.vladyslavbond.quizzing.domain.Instructor;
+import ch.protonmail.vladyslavbond.quizzing.controllers.TasksControllerException;
+import ch.protonmail.vladyslavbond.quizzing.domain.*;
 import ch.protonmail.vladyslavbond.quizzing.util.Identificator;
 import ch.protonmail.vladyslavbond.quizzing.util.NumericIdentificator;
 
 // TODO Split MyResource into smaller parts.
 
 @Path("/")
-public class MyResource 
+public enum MyResource 
 {
-    private final static Identificator<Instructor> ID_OF_INSTRUCTOR = NumericIdentificator.<Instructor>valueOf(1L);
-    private final static Identificator<Student>    ID_OF_STUDENT    = NumericIdentificator.<Student>valueOf(1L);
-    private final static Identificator<Exam>       ID_OF_EXAM       = NumericIdentificator.<Exam>valueOf(1L);
-    private final static Identificator<Pool>       ID_OF_POOL       = NumericIdentificator.<Pool>valueOf(1L);
+    INSTANCE ( );
+    
+    private final static Identificator<Instructor> ID_OF_INSTRUCTOR = NumericIdentificator.<Instructor>valueOf(1);
+    private final static Identificator<Student>    ID_OF_STUDENT    = NumericIdentificator.<Student>valueOf(1);
+    private final static Identificator<Exam>       ID_OF_EXAM       = NumericIdentificator.<Exam>valueOf(1);
+    private final static Identificator<Pool>       ID_OF_POOL       = NumericIdentificator.<Pool>valueOf(1);
+    
+    private MyResource ( ) {}
     
     @POST
     @Path("/tasks/new")
-    @Produces(MediaType.TEXT_HTML)
-    public Response taskCreate (@FormParam("type") Integer idOfTaskType, @FormParam("description") String description)
+    @Produces({MediaType.TEXT_HTML, MediaType.TEXT_PLAIN})
+    public Response taskCreate (@FormParam("type") Integer idOfTaskType, @FormParam("description") String description) 
+            throws URISyntaxException, ControllerException
     {
         Tasks controller = Controllers.<Tasks>getInstance(Tasks.class);
         Task task = controller.create(ID_OF_INSTRUCTOR, idOfTaskType, description);
@@ -63,33 +63,65 @@ public class MyResource
          */
         Pools poolsController = Controllers.<Pools>getInstance(Pools.class);
         poolsController.updateTaskAdd(ID_OF_POOL, task.getId( ));
-
-        return Response.ok().build( );
+        Long idOfTask = Long.valueOf(task.getId( ).toString( ));
+        return Response.seeOther(new URI (String.format("/tasks/%d", idOfTask))).build( );   
+    }
+    
+    @GET
+    @Path("/tasks/new")
+    @Produces(MediaType.TEXT_HTML)
+    public Response taskCreate ( )
+    {
+        StringBuilder html = new StringBuilder ( );
+        html.append("<!DOCTYPE html><html><head><title>New task.</title></head><body><main>");
+        html.append("<h1>New task.</h1>");
+        html.append("<form action='/tasks/new' method='POST'>");
+        html.append("<fieldset>");
+        html.append("<legend>Properties of a task.</legend>");
+        html.append("<label>Type of a task.");
+        html.append("<select name='type'>");
+        for (TaskType taskType : TaskType.values( ))
+        {
+            Integer idOfTaskType = Integer.valueOf(taskType.getId( ).toString( ));
+            html.append(String.format("<option value='%d'>%s</option>", idOfTaskType, taskType.toString( )));
+        }
+        html.append("</select>");
+        html.append("</label>");
+        html.append("<label>Description of a task.");
+        html.append("<textarea name='description'></textarea>");
+        html.append("</label>");
+        html.append("</fieldset>");
+        html.append("<input type='submit'>");
+        html.append("</form></main></body></html>");
+        return Response.ok( ).entity(html.toString( )).build( );
     }
     
     @GET
     @Path("/tasks/{id : \\d+}")
     @Produces(MediaType.TEXT_HTML)
     public Response taskRetrieve (@PathParam("id") Long idOfTask)
+        throws ControllerException
     {
         Tasks controller = Controllers.<Tasks>getInstance(Tasks.class);
-        Task task = controller.retrieve(idOfTask);
+        Task task = Task.EMPTY;
+            task = controller.retrieve(idOfTask);
         if (task == null || task.equals(Task.EMPTY))
         {
             return Response.status(Status.NOT_FOUND).build( );
         }
         StringBuilder html = new StringBuilder ( );
         html.append("<!DOCTYPE html><html><head><title>Task.</title></head><body>");
-        html.append(String.format("<article id='%d'>", task.getId( )));
-        html.append(String.format("<header><h1>Task #%d.</h1></header>", task.getId( )));
+        html.append(String.format("<article id='%d'>", idOfTask));
+        html.append(String.format("<header><h1>Task #%d.</h1></header>", idOfTask));
         html.append(String.format("<section><h2>Description of task.</h2><p>%s</p></section>", task.getDescription( )));
         if (task.getOptions( ) != null && !task.getOptions( ).isEmpty())
         {
             html.append("<section><h2>Options.</h2>");
             for (Option option : task.getOptions( ))
             {
-                html.append(String.format("<article id='%s'>", option.getId( ).toString( )));
-                html.append(String.format("<header><h3>Option #%d.</h3></header>",  option.getId( )));
+                Long idOfOption = Long.valueOf(option.getId( ).toString( ));
+                html.append(String.format("<article id='%d'>", idOfOption));
+                html.append(String.format("<header><h3>Option #%d.</h3></header>",  idOfOption));
                 html.append("<section><h4>Message.</h4>");
                 html.append(String.format("<p>%s</p>", option.getMessage( )));
                 html.append("</section>");
@@ -97,7 +129,7 @@ public class MyResource
                 html.append(String.format("<p>%d</p>", option.getReward( )));
                 html.append("</section>");
                 html.append(String.format("<section><h4>%s</h4>", "Update option."));
-                html.append(String.format("<form action='/tasks/%1$s/option/%2$s' method='GET'>", task.getId( ), option.getId( )));
+                html.append(String.format("<form action='/tasks/%1$d/option/%2$d' method='GET'>", idOfTask, idOfOption));
                 html.append("<input type='submit />");
                 html.append("</form>");
                 html.append("</section>");
@@ -107,10 +139,10 @@ public class MyResource
         }
         html.append("</article>");
         html.append(String.format("<section><h2>%s</h2>", "Update task description."));
-        html.append(String.format("<form action='/tasks/%1$d/update' method='POST'><input type='hidden' name='id' value='%1$d' /><textarea name='description'>%2$s</textarea><input type='submit /></form>", task.getId( ), task.getDescription( )));
+        html.append(String.format("<form action='/tasks/%1$d/update' method='POST'><input type='hidden' name='id' value='%1$d' /><textarea name='description'>%2$s</textarea><input type='submit' /></form>", idOfTask, task.getDescription( )));
         html.append("</section>");
         html.append(String.format("<section><h2>%s</h2>", "Delete task."));
-        html.append(String.format("<form action='/tasks/%1$d/destroy' method='POST'><input type='hidden' name='id' value='%1$d' /><input type='submit /></form>", task.getId( )));
+        html.append(String.format("<form action='/tasks/%1$d/destroy' method='POST'><input type='hidden' name='id' value='%1$d' /><input type='submit' /></form>", idOfTask));
         html.append("</section>");
         html.append("</body></html>");
         return Response.ok( ).entity(html.toString( )).build( );
@@ -120,10 +152,11 @@ public class MyResource
     @Produces(MediaType.TEXT_HTML)
     @Path("/tasks/{id : \\d+}/update")
     public Response taskUpdate (@PathParam("id") Long idOfTask, @FormParam("description") String description) 
-            throws URISyntaxException
+            throws URISyntaxException, TasksControllerException
     {
         Tasks controller = Controllers.getInstance(Tasks.class);
-        Task task = controller.update(ID_OF_INSTRUCTOR, NumericIdentificator.<Task>valueOf(idOfTask), description);
+        Task task = Task.EMPTY;
+        task = controller.update(ID_OF_INSTRUCTOR, NumericIdentificator.<Task>valueOf(idOfTask), description);
         if (task == null || task.equals(Option.EMPTY))
         {
             return Response.status(Status.BAD_REQUEST).build( );
@@ -135,10 +168,11 @@ public class MyResource
     @Path("/tasks/{id : \\d+}/option/new")
     @Produces(MediaType.TEXT_HTML)
     public Response optionCreate (@PathParam("id") Long idOfTask, @FormParam("message") String messageOfOption, @FormParam("reward") Integer reward) 
-            throws URISyntaxException
+            throws URISyntaxException, OptionsControllerException
     {
         Options controller = Controllers.getInstance(Options.class);
-        Option option = controller.create(idOfTask, messageOfOption, reward);
+        Option option = Option.EMPTY;
+            option = controller.create(idOfTask, messageOfOption, reward);
         if (option == null || option.equals(Option.EMPTY))
         {
             return Response.status(Status.BAD_REQUEST).build( );
@@ -149,17 +183,18 @@ public class MyResource
     @GET
     @Path("/tasks/{task_id : \\d+}/option/{option_id : \\d+}")
     @Produces(MediaType.TEXT_HTML)
-    public Response optionRetrieve (@PathParam("task_id") Long idOfTask, @PathParam ("option_id") Integer idOfOption)
+    public Response optionRetrieve (@PathParam("task_id") Long idOfTask, @PathParam ("option_id") Integer idOfOption) throws OptionsControllerException 
     {
         Options controller = Controllers.<Options>getInstance(Options.class);
-        Option option = controller.retrieve(NumericIdentificator.<Option>valueOf(idOfTask.toString( ).concat(idOfOption.toString( ))));
+        Option option;
+            option = controller.retrieve(NumericIdentificator.<Option>valueOf(idOfTask.toString( ).concat(idOfOption.toString( ))));
         if (option == null || option.equals(Option.EMPTY))
         {
             return Response.status(Status.NOT_FOUND).build( );
         }
         StringBuilder html = new StringBuilder ( );
         html.append("<!DOCTYPE html><html><head><title>Option.</title></head><body>");
-        html.append(String.format("<article id='%s'>", option.getId( ).toString( )));
+        html.append(String.format("<article id='%d'>", option.getId( ).toString( )));
         html.append(String.format("<header><h1>Option #%d.</h1></header>", option.getId( )));
         html.append("<section><h2>Message.</h2>");
         html.append(String.format("<p>%s</p>", option.getMessage( )));
@@ -192,11 +227,12 @@ public class MyResource
     @Path("/tasks/{task_id : \\d+}/option/{option_id : \\d+}/update")
     @Produces(MediaType.TEXT_HTML)
     public Response optionUpdate (@PathParam("task_id") Long idOfTask, @PathParam("option_id") Integer idOfOption, @FormParam("message") String messageOfOption, @FormParam("reward") Integer reward) 
-            throws URISyntaxException
+            throws URISyntaxException, OptionsControllerException
     {
         Options controller = Controllers.getInstance(Options.class);
         Identificator<Option> id = NumericIdentificator.<Option>valueOf(idOfTask.toString( ).concat(idOfOption.toString( )));
-        Option option = controller.update(id, messageOfOption, reward);
+        Option option = Option.EMPTY;
+            option = controller.update(id, messageOfOption, reward);
         if (option == null || option.equals(Option.EMPTY))
         {
             return Response.status(Status.BAD_REQUEST).build( );
@@ -208,11 +244,12 @@ public class MyResource
     @Path("/tasks/{task_id : \\d+}/option/{option_id : \\d+}/destroy")
     @Produces (MediaType.TEXT_HTML)
     public Response optionDestroy (Long idOfTask, Integer idOfOption) 
-            throws URISyntaxException
+            throws URISyntaxException, OptionsControllerException
     {
         Options controller = Controllers.getInstance(Options.class);
         Identificator<Option> id = NumericIdentificator.<Option>valueOf(idOfTask.toString( ).concat(idOfOption.toString( )));
-        boolean success = controller.destroy(id);
+        boolean success = false;
+            success = controller.destroy(id);
         if (success)
         {
             return Response.seeOther(new URI (String.format("/tasks/%d", idOfTask))).build( );
@@ -224,10 +261,11 @@ public class MyResource
     @Path("/assessments/new")
     @Produces (MediaType.TEXT_HTML)
     public Response assessmentCreate ( ) 
-            throws URISyntaxException
+            throws URISyntaxException, AssessmentsControllerException
     {
         Assessments controller = Controllers.<Assessments>getInstance(Assessments.class);
-        OngoingAssessment assessment = controller.create(ID_OF_STUDENT, ID_OF_EXAM);
+        OngoingAssessment assessment = OngoingAssessment.EMPTY;
+            assessment = controller.create(ID_OF_STUDENT, ID_OF_EXAM);
         if (assessment == null || assessment.equals(OngoingAssessment.EMPTY))
         {
             return Response.status(Status.BAD_REQUEST).build( );
@@ -238,10 +276,11 @@ public class MyResource
     @GET
     @Path("/assessments/{id : \\d+}")
     @Produces (MediaType.TEXT_HTML)
-    public Response assessmentRetrieve (@PathParam("id") Long idOfAssessment)
+    public Response assessmentRetrieve (@PathParam("id") Long idOfAssessment) throws AssessmentsControllerException, NumberFormatException, TaskFactoryException, AnswerFactoryException 
     {
         Assessments controller = Controllers.<Assessments>getInstance(Assessments.class);
-        Assessment assessment = controller.retrieve(idOfAssessment);
+        Assessment assessment = FinishedAssessment.EMPTY;
+            assessment = controller.retrieve(idOfAssessment);
         if (assessment == null || assessment.equals(FinishedAssessment.EMPTY))
         {
             return Response.status(Status.NOT_FOUND).build( );
@@ -266,8 +305,9 @@ public class MyResource
         }
         for (Task task : assessment.getTasks( ))
         {
-            html.append(String.format("<article id='%d'>", task.getId( )));
-            html.append(String.format("<header><h2>Task #%d.</h2></header>", task.getId( )));
+            Long idOfTask = Long.valueOf(task.getId( ).toString( ));
+            html.append(String.format("<article id='%d'>", idOfTask));
+            html.append(String.format("<header><h2>Task #%d.</h2></header>", idOfTask));
             html.append(String.format("<section><h3>Description of task.</h3><p>%s</p></section>", task.getDescription( )));
             if (task.getOptions( ) != null && !task.getOptions( ).isEmpty())
             {
@@ -297,7 +337,7 @@ public class MyResource
                     boolean isLastOne = (i == size);
                     if (isLastOne)
                     {
-                        html.append(String.format("<tr><td>%s</td><td rowspan='%d'>%d</td></tr>", answer.getInput( ), size, score.getReward( )));
+                        html.append(String.format("<tr><td>%s</td><td rowspan='%d'>%s</td></tr>", answer.getInput( ), size, score.getReward( )));
                     } else {
                         html.append(String.format("<tr><td>%s</td></tr>", answer.getInput( )));
                     }
@@ -316,7 +356,7 @@ public class MyResource
                 html.append("<section><h3>Provide answer.</h3>");
                 html.append(String.format("<form action='/assessments/%d/update' method='POST'>", idOfAssessment));
                 html.append(String.format("<input type='hidden' name='id' value='%d' required />", idOfAssessment));
-                html.append(String.format("<input type='hidden' name='task_id' value='%d' required />", task.getId( )));
+                html.append(String.format("<input type='hidden' name='task_id' value='%d' required />", idOfTask));
                 html.append("<input type='text' name='input' placeholder='Number of option or text.' required />");
                 html.append("</form></section>");
             }
@@ -331,7 +371,7 @@ public class MyResource
     @Path("/assessments/{id : \\d+}/update")
     @Produces (MediaType.TEXT_HTML)
     public Response assessmentUpdate (@PathParam("id") Long idOfAssessment, @FormParam("task_id") Long idOfTask, @FormParam("input") String input) 
-            throws URISyntaxException
+            throws URISyntaxException, AssessmentsControllerException
     {
         Assessments controller = Controllers.<Assessments>getInstance(Assessments.class);
         OngoingAssessment assessment = controller.update(idOfAssessment, idOfTask, input);
@@ -339,13 +379,13 @@ public class MyResource
         {
             return Response.status(Status.NOT_FOUND).build( );
         }
-        return Response.seeOther(new URI (String.format("/assessments/%d", assessment.getId( )))).build( );
+        return Response.seeOther(new URI (String.format("/assessments/%d", idOfAssessment))).build( );
     }
     
     @POST
     @Path("/assessments/{id : \\d+}/destroy")
     @Produces (MediaType.TEXT_HTML)
-    public Response assessmentDestroy (@PathParam("id") Long idOfAssessment)
+    public Response assessmentDestroy (@PathParam("id") Long idOfAssessment) throws AssessmentsControllerException 
     {
         Assessments controller = Controllers.<Assessments>getInstance(Assessments.class);
         boolean success = controller.destroy(idOfAssessment);
@@ -360,7 +400,7 @@ public class MyResource
     @Path("/assessments/{id : \\d+}/finish")
     @Produces (MediaType.TEXT_HTML)
     public Response assessmentFinish (@PathParam("id") Long idOfAssessment)
-            throws URISyntaxException
+            throws URISyntaxException, AssessmentsControllerException
     {
         Assessments controller = Controllers.<Assessments>getInstance(Assessments.class);
         boolean success = controller.finish(idOfAssessment);

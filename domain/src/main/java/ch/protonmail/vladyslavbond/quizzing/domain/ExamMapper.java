@@ -1,5 +1,6 @@
 package ch.protonmail.vladyslavbond.quizzing.domain;
 
+import ch.protonmail.vladyslavbond.quizzing.datasource.MapperException;
 import ch.protonmail.vladyslavbond.quizzing.datasource.NativeMapper;
 import ch.protonmail.vladyslavbond.quizzing.util.Identificator;
 import ch.protonmail.vladyslavbond.quizzing.util.NumericIdentificator;
@@ -13,7 +14,7 @@ extends NativeMapper<Exam>
     }
     
     @Override
-    public Exam build ( )
+    public Exam build ( ) throws ExamMapperException, MapperException
     {
         Identificator<Exam> id = NumericIdentificator.<Exam>valueOf(this.<Long>get("id", Long.class));
         String title = this.<String>get("title", String.class);

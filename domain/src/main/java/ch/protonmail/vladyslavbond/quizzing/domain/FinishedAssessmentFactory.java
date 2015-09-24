@@ -4,6 +4,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import ch.protonmail.vladyslavbond.quizzing.datasource.DataAccessException;
+import ch.protonmail.vladyslavbond.quizzing.datasource.MapperException;
 import ch.protonmail.vladyslavbond.quizzing.util.Identificator;
 import ch.protonmail.vladyslavbond.quizzing.util.NumericIdentificator;
 
@@ -17,7 +18,7 @@ implements Factory<FinishedAssessment>
     }
 	
 	@Override
-	public FinishedAssessment getInstance (Identificator<FinishedAssessment> id) 
+	public FinishedAssessment getInstance (Identificator<FinishedAssessment> id) throws AssessmentFactoryException 
 	{
         Object[] arguments = {
                 ((NumericIdentificator<FinishedAssessment>)id).longValue()
@@ -25,13 +26,13 @@ implements Factory<FinishedAssessment>
       try
       {
           return this.getDataAccess( ).fetch("SELECT * FROM view_finished_assessments WHERE id = ?;", arguments);
-      } catch (DataAccessException e)
+      } catch (MapperException | DataAccessException e)
       {
           throw new AssessmentFactoryException (e);
       }
 	}
 	
-	public Set<FinishedAssessment> getInstances (Identificator<Student> idOfStudent)
+	public Set<FinishedAssessment> getInstances (Identificator<Student> idOfStudent) throws AssessmentFactoryException
 	{
         Object[] arguments = {
                 ((NumericIdentificator<Student>)idOfStudent).longValue()
@@ -40,7 +41,7 @@ implements Factory<FinishedAssessment>
       try
       {
           assessments.addAll(this.getDataAccess( ).fetchAll("SELECT * FROM view_finished_assessments WHERE student_id = ?;", arguments));
-      } catch (DataAccessException e)
+      } catch (MapperException | DataAccessException e)
       {
           throw new AssessmentFactoryException (e);
       }

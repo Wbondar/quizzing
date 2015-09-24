@@ -23,7 +23,7 @@ implements Identifiable<Pool>
 		this.title = title;
 	}
 	
-	public Set<Task> getTasks (int quantityOfTasksToBeFetched)
+	public Set<Task> getTasks (int quantityOfTasksToBeFetched) throws TaskFactoryException
 	{
 		return Factories.<TaskFactory>getInstance(TaskFactory.class).getInstances(this.id, quantityOfTasksToBeFetched);
 	}

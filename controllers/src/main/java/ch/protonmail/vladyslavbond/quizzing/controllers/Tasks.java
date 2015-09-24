@@ -13,28 +13,40 @@ extends Controller
     }
 
     public Task create(Identificator<Instructor> idOfInstructor, Integer idOfTaskType, String description)
+        throws TasksControllerException
     {
         return create(idOfInstructor, TaskType.valueOf(idOfTaskType), description);
     }
 
     public Task create(Identificator<Instructor> idOfInstructor, TaskType taskType, String description)
+        throws TasksControllerException
     {
-        return getTaskFactory( ).newInstance(idOfInstructor, taskType, description);
+        try
+        {
+            return getTaskFactory( ).newInstance(idOfInstructor, taskType, description);
+        } catch (TaskFactoryException e) {
+            throw new TasksControllerException (e);
+        }
     }
 
-    public Task retrieve(Long idOfTask)
+    public Task retrieve(Long idOfTask) throws TasksControllerException
     {
         return this.retrieve(NumericIdentificator.<Task>valueOf(idOfTask));
     }
 
-    public Task retrieve(Identificator<Task> id)
+    public Task retrieve(Identificator<Task> id) throws TasksControllerException
     {
-        Task task = getTaskFactory( ).getInstance(id);
-        if (task == null || task.equals(Task.EMPTY))
+        try
         {
-            return Task.EMPTY;
+            Task task = getTaskFactory( ).getInstance(id);
+            if (task == null || task.equals(Task.EMPTY))
+            {
+                return Task.EMPTY;
+            }
+            return task;
+        } catch (TaskFactoryException e) {
+            throw new TasksControllerException (e);
         }
-        return task;
     }
     
     private InstructorFactory getInstructorFactory ( )
@@ -42,14 +54,29 @@ extends Controller
         return Factories.<InstructorFactory>getInstance(InstructorFactory.class);
     }
     
-    public Task update (Identificator<Instructor> idOfInstructor, Identificator<Task> idOfTask, String newDescription)
+    public Task update (Identificator<Instructor> idOfInstructor, Identificator<Task> idOfTask, String newDescription) throws TasksControllerException
     {
-        return this.update(getInstructorFactory( ).getInstance(idOfInstructor), getTaskFactory( ).getInstance(idOfTask), newDescription);
+        try
+        {
+            return this.update(getInstructorFactory( ).getInstance(idOfInstructor), getTaskFactory( ).getInstance(idOfTask), newDescription);
+        } catch (InstructorFactoryException e)
+        {
+            throw new TasksControllerException (e);
+        } catch (TaskFactoryException e)
+        {
+            throw new TasksControllerException (e);
+        }
     }
 
-    public Task update (Instructor instructor, Task task, String newDescription)
+    public Task update (Instructor instructor, Task task, String newDescription) throws TasksControllerException
     {
-        task = getTaskFactory( ).update(instructor, task, newDescription);
+        try
+        {
+            task = getTaskFactory( ).update(instructor, task, newDescription);
+        } catch (TaskFactoryException e)
+        {
+            throw new TasksControllerException (e);
+        }
         if (task == null || task.equals(Task.EMPTY))
         {
             return Task.EMPTY;

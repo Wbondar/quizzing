@@ -26,7 +26,7 @@ implements Assessment, Identifiable<OngoingAssessment>
 	    this.student = student;
 	}
 	
-	private final Answer provideAnswer (Task task, String input)
+	private final Answer provideAnswer (Task task, String input) throws AnswerFactoryException
 	{
         if (task.provideAnswer(input))
         {
@@ -36,7 +36,7 @@ implements Assessment, Identifiable<OngoingAssessment>
         return Answer.EMPTY;
 	}
 	
-	public final Answer provideAnswer (Identificator<Task> idOfTask, String input)
+	public final Answer provideAnswer (Identificator<Task> idOfTask, String input) throws AnswerFactoryException, TaskFactoryException
 	{
 		for (Task task : this.getTasks( ))
 		{
@@ -52,8 +52,9 @@ implements Assessment, Identifiable<OngoingAssessment>
 	 * Ensure that task belongs to the assessment before calling.
 	 * @param task
 	 * @return
+	 * @throws ScoreFactoryException 
 	 */
-	private final Score score (Task task)
+	private final Score score (Task task) throws ScoreFactoryException
 	{
 	    ScoreFactory scoreFactory = Factories.<ScoreFactory>getInstance(ScoreFactory.class);
 	    Score score = scoreFactory.newInstance(this, task, task.score( ));
@@ -64,7 +65,7 @@ implements Assessment, Identifiable<OngoingAssessment>
         return Score.EMPTY;
 	}
 	
-	public final boolean finish ( )
+	public final boolean finish ( ) throws AssessmentFactoryException, ScoreFactoryException, TaskFactoryException
 	{
 		for (Task task : this.getTasks( ))
 		{
@@ -87,7 +88,7 @@ implements Assessment, Identifiable<OngoingAssessment>
     }
 
     @Override
-    public Set<Task> getTasks()
+    public Set<Task> getTasks() throws TaskFactoryException
     {
         TaskFactory taskFactory = Factories.<TaskFactory>getInstance(TaskFactory.class);
         /**

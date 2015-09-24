@@ -1,5 +1,6 @@
 package ch.protonmail.vladyslavbond.quizzing.domain;
 
+import ch.protonmail.vladyslavbond.quizzing.datasource.MapperException;
 import ch.protonmail.vladyslavbond.quizzing.datasource.NativeMapper;
 import ch.protonmail.vladyslavbond.quizzing.util.Identificator;
 import ch.protonmail.vladyslavbond.quizzing.util.NumericIdentificator;
@@ -12,7 +13,7 @@ class PoolMapper extends NativeMapper<Pool>
     }
     
     @Override
-    public Pool build ( )
+    public Pool build ( ) throws PoolMapperException, MapperException
     {
         Identificator<Pool> id = NumericIdentificator.<Pool>valueOf(this.<Long>get("id", Long.class));
         String title = this.<String>get("title", String.class);

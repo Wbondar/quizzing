@@ -4,6 +4,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import ch.protonmail.vladyslavbond.quizzing.datasource.DataAccessException;
+import ch.protonmail.vladyslavbond.quizzing.datasource.MapperException;
 import ch.protonmail.vladyslavbond.quizzing.util.Identificator;
 import ch.protonmail.vladyslavbond.quizzing.util.NumericIdentificator;
 
@@ -17,7 +18,7 @@ implements Factory<Option>
     }
 	
 	@Override
-	public Option getInstance (Identificator<Option> id) 
+	public Option getInstance (Identificator<Option> id) throws OptionFactoryException 
 	{
 	      Object[] arguments = {
 	              ((NumericIdentificator<Option>)id).longValue()
@@ -25,13 +26,13 @@ implements Factory<Option>
 	      try
 	      {
 	          return this.getDataAccess( ).fetch("SELECT * FROM view_options WHERE id = ?;", arguments);
-	      } catch (DataAccessException e)
+	      } catch (DataAccessException | MapperException e)
 	      {
 	          throw new OptionFactoryException (e);
 	      }
 	}
 	
-	public Set<Option> getInstances (Identificator<Task> idOfTask)
+	public Set<Option> getInstances (Identificator<Task> idOfTask) throws OptionFactoryException
 	{
         Object[] arguments = {
                 ((NumericIdentificator<Task>)idOfTask).longValue()
@@ -40,20 +41,20 @@ implements Factory<Option>
         try
         {
             options.addAll(this.getDataAccess( ).fetchAll("SELECT * FROM view_options WHERE task_id = ?;", arguments));
-        } catch (DataAccessException e)
+        } catch (DataAccessException | MapperException e)
         {
             throw new OptionFactoryException (e);
         }
         return options;
 	}
 
-	public Option newInstance(Task task, String messageOfOption, Integer reward) 
+	public Option newInstance(Task task, String messageOfOption, Integer reward) throws OptionFactoryException 
 	{
 	    return this.newInstance(task.getId( ), messageOfOption, reward);
 	}
 
 	private Option newInstance(Identificator<Task> id, String messageOfOption,
-            Integer reward)
+            Integer reward) throws OptionFactoryException
     {
 	      Object[] arguments = {
 	              ((NumericIdentificator<Task>)id).longValue()
@@ -63,18 +64,18 @@ implements Factory<Option>
 	      try
 	      {
 	          return this.getDataAccess( ).store("{CALL option_create (?, ?, ?)}", arguments);
-	      } catch (DataAccessException e)
+	      } catch (DataAccessException | MapperException e)
 	      {
 	          throw new OptionFactoryException (e);
 	      }
     }
 
-    public Option update(Option option, Integer reward) 
+    public Option update(Option option, Integer reward) throws OptionFactoryException 
 	{
         return this.update(option.getId( ), reward);
 	}
 
-	private Option update(Identificator<Option> id, Integer reward)
+	private Option update(Identificator<Option> id, Integer reward) throws OptionFactoryException
     {
         Object[] arguments = {
                 ((NumericIdentificator<Option>)id).longValue()
@@ -83,18 +84,18 @@ implements Factory<Option>
         try
         {
             return this.getDataAccess( ).store("{CALL option_update_reward (?, ?)}", arguments);
-        } catch (DataAccessException e)
+        } catch (DataAccessException | MapperException e)
         {
             throw new OptionFactoryException (e);
         }
     }
 
-	public Option update (Option option, String messageOfOption) 
+	public Option update (Option option, String messageOfOption) throws OptionFactoryException 
 	{
 		return this.update(option.getId( ), messageOfOption);
 	}
 
-    private Option update(Identificator<Option> id, String messageOfOption)
+    private Option update(Identificator<Option> id, String messageOfOption) throws OptionFactoryException
     {
         Object[] arguments = {
                 ((NumericIdentificator<Option>)id).longValue()
@@ -103,7 +104,7 @@ implements Factory<Option>
         try
         {
             return this.getDataAccess( ).store("{CALL option_update_message (?, ?)}", arguments);
-        } catch (DataAccessException e)
+        } catch (DataAccessException | MapperException e)
         {
             throw new OptionFactoryException (e);
         }

@@ -42,6 +42,7 @@ implements Mapper<T>
         if (argument == null)
         {
             remove(label);
+            return;
         }
         this.labelToType.put(label, parameterType);
         this.labelToArgument.put(label, argument);
@@ -56,8 +57,14 @@ implements Mapper<T>
      */
     @Override
     public final <P> P get (String label, Class<P> parameterType)
+        throws MapperException
     {
-        return parameterType.cast(this.labelToArgument.get(label));
+        P p = parameterType.cast(this.labelToArgument.get(label));
+        if (p == null)
+        {
+            throw new NativeMapperException (String.format("Value requested by alias %s is missing from the mapper.", label));
+        }
+        return p;
     }
     
     @Override
@@ -81,5 +88,5 @@ implements Mapper<T>
         this.labelToType.clear( );
     }
 
-    public abstract T build();
+    public abstract T build() throws MapperException;
 }

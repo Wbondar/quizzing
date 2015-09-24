@@ -5,12 +5,12 @@ import ch.protonmail.vladyslavbond.quizzing.util.Identifiable;
 abstract class RewardCalculator 
 implements Identifiable<RewardCalculator> 
 {
+    private final Task task;
+    
 	RewardCalculator (Task taskToCalcualteGradeFor) 
 	{
 		this.task = taskToCalcualteGradeFor;
 	}
-	
-	private final Task task;
 	
 	protected final Task getTask ( )
 	{

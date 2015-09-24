@@ -1,6 +1,7 @@
 package ch.protonmail.vladyslavbond.quizzing.domain;
 
 import ch.protonmail.vladyslavbond.quizzing.datasource.Mapper;
+import ch.protonmail.vladyslavbond.quizzing.datasource.MapperException;
 
 public final class InstructorMapper
 extends Object
@@ -20,7 +21,7 @@ implements Mapper<Instructor>
     }
 
     @Override
-    public <P> P get(String label, Class<P> parameterType)
+    public <P> P get(String label, Class<P> parameterType) throws MapperException
     {
         return this.memberMapper.<P>get(label, parameterType);
     }
@@ -44,7 +45,7 @@ implements Mapper<Instructor>
     }
 
     @Override
-    public Instructor build ( )
+    public Instructor build ( ) throws MemberMapperException
     {
         Member member = this.memberMapper.build( );
         return new Instructor (member);

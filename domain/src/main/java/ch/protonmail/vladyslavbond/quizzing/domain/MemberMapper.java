@@ -1,6 +1,8 @@
 package ch.protonmail.vladyslavbond.quizzing.domain;
 
+import ch.protonmail.vladyslavbond.quizzing.datasource.MapperException;
 import ch.protonmail.vladyslavbond.quizzing.datasource.NativeMapper;
+import ch.protonmail.vladyslavbond.quizzing.datasource.NativeMapperException;
 import ch.protonmail.vladyslavbond.quizzing.util.Identificator;
 import ch.protonmail.vladyslavbond.quizzing.util.NumericIdentificator;
 
@@ -13,12 +15,17 @@ extends NativeMapper<Member>
     }
     
     @Override
-    public Member build()
+    public Member build() throws MemberMapperException
     {
-        Identificator<Member> id = NumericIdentificator.<Member>valueOf(get("id", Long.class));
-        String screenName = get("screen_name", String.class);
-        Member member = new Member (id, screenName);
-        return member;
+        try
+        {
+            Identificator<Member> id = NumericIdentificator.<Member>valueOf(get("id", Integer.class));
+            String screenName = get("screen_name", String.class);
+            Member member = new Member (id, screenName);
+            return member;
+        } catch (MapperException e) {
+            throw new MemberMapperException (e);
+        }
     }
 
 }

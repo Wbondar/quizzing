@@ -8,7 +8,7 @@ public final class Factories
 		{
 			return typeOfFactory.newInstance( );
 		} catch (Exception e) {
-			throw new FactoryInstantiationFailedException (typeOfFactory, e);
+			throw new AssertionError ("Failed to instantiate factory " + typeOfFactory.toString( ) + ".", e);
 		}
 	}
 	

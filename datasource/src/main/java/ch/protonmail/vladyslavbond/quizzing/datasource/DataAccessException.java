@@ -12,4 +12,9 @@ extends Exception
     {
         super(message, cause);
     }
+    
+    DataAccessException (String message)
+    {
+        super(message);
+    }
 }

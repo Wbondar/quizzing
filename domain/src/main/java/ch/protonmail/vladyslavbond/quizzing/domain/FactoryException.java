@@ -1,7 +1,7 @@
 package ch.protonmail.vladyslavbond.quizzing.domain;
 
 public abstract class FactoryException 
-extends RuntimeException 
+extends Exception 
 {
 	/**
      * 

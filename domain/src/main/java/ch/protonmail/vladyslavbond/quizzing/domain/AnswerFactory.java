@@ -4,6 +4,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import ch.protonmail.vladyslavbond.quizzing.datasource.DataAccessException;
+import ch.protonmail.vladyslavbond.quizzing.datasource.MapperException;
 import ch.protonmail.vladyslavbond.quizzing.util.Identificator;
 import ch.protonmail.vladyslavbond.quizzing.util.NumericIdentificator;
 
@@ -16,7 +17,7 @@ implements Factory<Answer>
 	    super(Answer.class, new AnswerMapper ( ));
 	}
 	
-	public Answer newInstance (OngoingAssessment assessment, Task task, String input)
+	public Answer newInstance (OngoingAssessment assessment, Task task, String input) throws AnswerFactoryException
 	{
 		Object[] arguments = {
 		        ((NumericIdentificator<OngoingAssessment>)assessment.getId( )).longValue( )
@@ -26,20 +27,20 @@ implements Factory<Answer>
 		try
         {
             return this.getDataAccess( ).store("{CALL answer_create(?, ?, ?)}", arguments);
-        } catch (DataAccessException e)
+        } catch (MapperException | DataAccessException e)
         {
            throw new AnswerFactoryException (e);
         }
 	}
 	
 	@Override
-	public Answer getInstance (Identificator<Answer> id) 
+	public Answer getInstance (Identificator<Answer> id) throws AnswerFactoryException 
 	{
 		Object[] arguments = {((NumericIdentificator<Answer>)id).longValue( )};
 		try
         {
             return this.getDataAccess( ).fetch("SELECT * FROM view_answers WHERE id = ?;", arguments);
-        } catch (DataAccessException e)
+        } catch (MapperException | DataAccessException e)
         {
             throw new AnswerFactoryException (e);
         }

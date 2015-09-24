@@ -5,6 +5,8 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.ResourceBundle;
 
+import org.postgresql.Driver;
+
 enum NativeConnectionFactory 
 implements ConnectionFactory
 {
@@ -35,6 +37,15 @@ implements ConnectionFactory
     public Connection getConnection ( ) 
             throws SQLException
     {
+        if (!Driver.isRegistered())
+            throw new SQLException ("Database driver is not registered.");
+        try
+        {
+            Class.forName("org.postgresql.Driver");
+        } catch (ClassNotFoundException e)
+        {
+           throw new SQLException ("Failed to connect to the database.", e);
+        }
         return DriverManager.getConnection(url, user, password);
     }
 }

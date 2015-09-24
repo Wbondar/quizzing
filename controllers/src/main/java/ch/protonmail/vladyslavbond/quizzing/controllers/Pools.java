@@ -21,9 +21,15 @@ extends Controller
         return Factories.<InstructorFactory>getInstance(InstructorFactory.class);
     }
     
-    public Pool create (Identificator<Instructor> idOfInstructor, String titleOfPool)
+    public Pool create (Identificator<Instructor> idOfInstructor, String titleOfPool) throws PoolsControllerException
     {
-        return this.create(getInstructorFactory( ).getInstance(idOfInstructor), titleOfPool);
+        try
+        {
+            return this.create(getInstructorFactory( ).getInstance(idOfInstructor), titleOfPool);
+        } catch (InstructorFactoryException e)
+        {
+            throw new PoolsControllerException (e);
+        }
     }
     
     public Result read (Pool pool) 
@@ -76,8 +82,14 @@ extends Controller
         return Factories.<TaskFactory>getInstance(TaskFactory.class);
     }
 
-    public Pool updateTaskAdd (Identificator<Pool> idOfPool, Identificator<Task> id)
+    public Pool updateTaskAdd (Identificator<Pool> idOfPool, Identificator<Task> id) throws PoolsControllerException
     {
-        return updateTaskAdd(getPoolFactory( ).getInstance(idOfPool), getTaskFactory( ).getInstance(id));
+        try
+        {
+            return updateTaskAdd(getPoolFactory( ).getInstance(idOfPool), getTaskFactory( ).getInstance(id));
+        } catch (TaskFactoryException e)
+        {
+            throw new PoolsControllerException (e);
+        }
     }
 }

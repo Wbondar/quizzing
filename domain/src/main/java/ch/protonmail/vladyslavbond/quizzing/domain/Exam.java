@@ -28,7 +28,7 @@ implements Identifiable<Exam>
 		return Factories.<PoolFactory>getInstance(PoolFactory.class).getInstances(this.id);
 	}
 	
-	Set<Task> getTasks ( )
+	Set<Task> getTasks ( ) throws TaskFactoryException
 	{
 		return Factories.<TaskFactory>getInstance(TaskFactory.class).getInstances(this);
 	}

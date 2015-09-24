@@ -11,13 +11,13 @@ extends NumericIdentificator<T>
 	public IntegerIdentificator (int id)
     {
         this.id = id;
-        this.hashCode = IntegerIdentificator.class.hashCode( ) + id;
+        this.hashCode = id;
     }
 	
 	public IntegerIdentificator (Integer id)
 	{
 	    this.id = id.intValue( );
-	    this.hashCode = IntegerIdentificator.class.hashCode( ) + id.intValue( );
+	    this.hashCode = id.intValue( );
 	}
 
     private final int id;
@@ -82,5 +82,11 @@ extends NumericIdentificator<T>
     public int hashCode ( )
     {
         return this.hashCode;
+    }
+    
+    @Override
+    public String toString ( )
+    {
+        return String.valueOf(this.id);
     }
 }

@@ -1,12 +1,15 @@
 package ch.protonmail.vladyslavbond.quizzing.datasource;
 
 import java.sql.CallableStatement;
+import java.sql.SQLType;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.NoSuchElementException;
 
 public class DataAccess<T>
 extends Object
@@ -28,7 +31,7 @@ extends Object
 	}
 	
 	private final Collection<T> processResultSet (ResultSet resultSet, Mapper<T> mapper) 
-	        throws SQLException
+	        throws SQLException, MapperException
     {
         ResultSetMetaData resultSetMetaData = resultSet.getMetaData();
         ArrayList<T> entities = new ArrayList<T> ( );
@@ -58,13 +61,13 @@ extends Object
     }
 
     private final Collection<T> processResultSet(ResultSet resultSet) 
-            throws SQLException
+            throws SQLException, MapperException
     {
         return this.processResultSet(resultSet, this.getDefaultMapper( ));
     }
 
-    public final Collection<T> fetchAll (String sql, NativeMapper<T> mapper, Object... values)
-    throws DataAccessException
+    public final Collection<T> fetchAll (String sql, Mapper<T> mapper, Object... values)
+    throws DataAccessException, MapperException
     {
         try
         {
@@ -76,31 +79,53 @@ extends Object
     }
 
     public final Collection<T> fetchAll (String sql, Object... values) 
-	        throws DataAccessException
+	        throws DataAccessException, MapperException
 	{
 	    return this.fetchAll(sql, getDefaultMapper( ), values);
 	}
 	
-	public final Collection<T> fetchAll (String sql) 
-	        throws DataAccessException
+	private final Collection<T> fetchAll (String sql) 
+	        throws DataAccessException, MapperException
 	{
 	    return fetchAll(sql, new Object[0]);
 	}
 	
 	public final T fetch (String sql, Object... values) 
-	        throws DataAccessException
+	        throws DataAccessException, MapperException
 	{
-	    return fetchAll(sql, values).iterator().next();
+	    try
+	    {
+	        return fetchAll(sql, values).iterator().next();
+	    } catch (NoSuchElementException e) {
+	        return null;
+	    }
 	}
     
-    public final T fetch (String sql) 
-            throws DataAccessException
+    private final T fetch (String sql) 
+            throws DataAccessException, MapperException
     {
         return fetch(sql, new Object[0]);
     }
+    
+    private final int resolveType (Object o)
+    {
+        if (o instanceof Long)
+        {
+            return Types.BIGINT;
+        }
+        if (o instanceof Integer)
+        {
+            return Types.INTEGER;
+        }
+        if (o instanceof String)
+        {
+            return Types.VARCHAR;
+        }
+        return Types.JAVA_OBJECT;
+    }
 
-    public final Collection<T> storeAll (String sql, Object... arguments) 
-            throws DataAccessException
+    public final Collection<T> storeAll (String sql, Mapper<T> mapper, Object... arguments) 
+            throws DataAccessException, MapperException
     {
          try
          {
@@ -110,10 +135,21 @@ extends Object
              throw new DataAccessException ("Failed to store data in the database.", e);
          }
     }
+    
+    public final Collection<T> storeAll (String sql, Object...arguments) 
+            throws DataAccessException, MapperException
+    {
+        return this.storeAll(sql, getDefaultMapper( ), arguments);
+    }
 
     public final T store (String sql, Object... arguments) 
-            throws DataAccessException
+            throws DataAccessException, MapperException
     {
-         return this.storeAll(sql, arguments).iterator( ).next( );
+        try
+        {
+            return this.storeAll(sql, arguments).iterator( ).next( );   
+        } catch (NoSuchElementException e) {
+            return null;
+        }
     }
 }

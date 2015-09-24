@@ -1,7 +1,7 @@
 package ch.protonmail.vladyslavbond.quizzing.controllers;
 
 public abstract class ControllerException 
-extends RuntimeException
+extends Exception
 {
 
     /**
@@ -12,5 +12,10 @@ extends RuntimeException
     ControllerException (String message, Throwable cause)
     {
         super(message, cause);
+    }
+    
+    ControllerException (Throwable cause)
+    {
+        this("Controller failed to perform it's duties.", cause);
     }
 }

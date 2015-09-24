@@ -26,7 +26,7 @@ implements Party, Identifiable<Student>
 		this.screenName = member.getScreenName( );
 	}
 	
-	public final Set<FinishedAssessment> getAssessments ( )
+	public final Set<FinishedAssessment> getAssessments ( ) throws AssessmentFactoryException
 	{
 		return Factories.<FinishedAssessmentFactory>getInstance(FinishedAssessmentFactory.class).getInstances(this.id);
 	}

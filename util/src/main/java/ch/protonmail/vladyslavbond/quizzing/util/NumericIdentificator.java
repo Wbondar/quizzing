@@ -29,4 +29,10 @@ implements Identificator<T>
             return new LongIdentificator<T> (Long.valueOf(id));
         }
     }
+    
+    @Override
+    public final NumericIdentificator<T> toNumber ( )
+    {
+        return this;
+    }
 }

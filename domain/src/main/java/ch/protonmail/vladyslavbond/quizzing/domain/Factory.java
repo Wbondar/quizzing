@@ -5,5 +5,5 @@ import ch.protonmail.vladyslavbond.quizzing.util.Identificator;
 
 interface Factory<T extends Identifiable<T>> 
 {
-	public abstract T getInstance (Identificator<T> id);
+	public abstract T getInstance (Identificator<T> id) throws FactoryException;
 }
