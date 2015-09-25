@@ -47,17 +47,29 @@ extends Controller
         try
         {
             Option option = getOptionFactory( ).getInstance(id);
+            if (option == null || option.equals(Option.EMPTY))
+            {
+                throw new OptionsControllerException ("Option of id " + id.toString( ) + " does not exist.");
+            }
             if (messageOfOption != null && !messageOfOption.isEmpty( ))
             {
                 option = getOptionFactory( ).update(option, messageOfOption);
+                if (option == null || option.equals(Option.EMPTY))
+                {
+                    throw new OptionsControllerException ("Failed to update message of an option.");
+                }
             }
             if (reward != null)
             {
                 option = getOptionFactory( ).update(option, reward);
+                if (option == null || option.equals(Option.EMPTY))
+                {
+                    throw new OptionsControllerException ("Failed to update reward of an option.");
+                }
             }
             if (option == null || option.equals(Option.EMPTY))
             {
-                return Option.EMPTY;
+                throw new OptionsControllerException ("Failed to update an option.");
             }
             return option;   
         } catch (OptionFactoryException e) {
@@ -80,7 +92,7 @@ extends Controller
         return getOptionFactory( ).destroy(instance);
     }
 
-    public Option create(Long idOfTask, String messageOfOption, Integer reward) throws OptionsControllerException
+    public Option create(Integer idOfTask, String messageOfOption, Integer reward) throws OptionsControllerException
     {
         try
         {

@@ -99,7 +99,7 @@ implements Factory<Task>
         };
         try
         {
-            return this.getDataAccess( ).store("SELECT * FROM task_create(?, ?, ?);", arguments);
+            return this.getDataAccess( ).store("{CALL task_create(?, ?, ?)}", arguments);
         } catch (MapperException | DataAccessException e)
         {
             throw new TaskFactoryException ("Failed to create new task.", e);

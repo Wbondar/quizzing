@@ -18,4 +18,9 @@ extends Exception
     {
         this("Controller failed to perform it's duties.", cause);
     }
+
+    public ControllerException(String string)
+    {
+        super(string);
+    }
 }

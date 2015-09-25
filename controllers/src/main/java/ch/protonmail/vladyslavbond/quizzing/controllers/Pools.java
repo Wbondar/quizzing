@@ -32,26 +32,6 @@ extends Controller
         }
     }
     
-    public Result read (Pool pool) 
-    {
-        if (pool == null || pool.equals(Pool.EMPTY))
-        {
-            return badRequest("Failure.");
-        }
-        return ok(pool.getTitle( ));
-    }
-    
-    public Result update (Pool pool, String titleOfPool) 
-    {
-        PoolFactory poolFactory = Factories.<PoolFactory>getInstance(PoolFactory.class);
-        pool = poolFactory.update(pool, titleOfPool);
-        if (pool == null || pool.equals(Pool.EMPTY))
-        {
-            return badRequest("Failure.");
-        }
-        return this.read(pool);
-    }
-    
     public Pool updateTaskAdd (Pool pool, Task task) 
     {
         pool = getPoolFactory( ).update(pool, task, true);

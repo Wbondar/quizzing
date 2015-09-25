@@ -35,7 +35,7 @@ implements Factory<Option>
 	public Set<Option> getInstances (Identificator<Task> idOfTask) throws OptionFactoryException
 	{
         Object[] arguments = {
-                ((NumericIdentificator<Task>)idOfTask).longValue()
+                ((NumericIdentificator<Task>)idOfTask).intValue()
         };
         Set<Option> options = new HashSet<Option> ( );
         try
@@ -57,7 +57,7 @@ implements Factory<Option>
             Integer reward) throws OptionFactoryException
     {
 	      Object[] arguments = {
-	              ((NumericIdentificator<Task>)id).longValue()
+	              ((NumericIdentificator<Task>)id).intValue()
 	              ,messageOfOption
 	              ,reward
 	      };

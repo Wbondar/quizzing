@@ -11,13 +11,16 @@ public class OptionsControllerException extends ControllerException
     public OptionsControllerException(String message, Throwable cause)
     {
         super(message, cause);
-        // TODO Auto-generated constructor stub
     }
 
     public OptionsControllerException(Throwable cause)
     {
         super(cause);
-        // TODO Auto-generated constructor stub
+    }
+
+    public OptionsControllerException(String string)
+    {
+        super(string);
     }
 
 }

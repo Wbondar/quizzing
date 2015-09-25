@@ -29,7 +29,7 @@ extends Controller
         }
     }
 
-    public Task retrieve(Long idOfTask) throws TasksControllerException
+    public Task retrieve(Integer idOfTask) throws TasksControllerException
     {
         return this.retrieve(NumericIdentificator.<Task>valueOf(idOfTask));
     }

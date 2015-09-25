@@ -1,6 +1,5 @@
 package ch.protonmail.vladyslavbond.quizzing.web;
 
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -11,14 +10,21 @@ import javax.ws.rs.ApplicationPath;
 public final class QuizzingApplication 
 extends Application
 {
-    private final Set<Class<?>> classes;
-    private final Set<Object>   singletons;
+    private final static Set<Class<?>> classes = new HashSet<Class<?>> ( );
+    private final static Set<Object>   singletons = new HashSet<Object> ( );
+    
+    static
+    {
+        classes.add(TasksResource.class);
+        classes.add(OptionsResource.class);
+        classes.add(AssessmentsResource.class);
+        singletons.add(TasksResource.INSTANCE);
+        singletons.add(OptionsResource.INSTANCE);
+        singletons.add(AssessmentsResource.INSTANCE);
+    }
     
     public QuizzingApplication ( )
     {
-        this.classes    = Collections.<Class<?>>emptySet( );
-        this.singletons = new HashSet<Object> ( );
-        this.singletons.add(MyResource.INSTANCE);
     }
     
     @Override
