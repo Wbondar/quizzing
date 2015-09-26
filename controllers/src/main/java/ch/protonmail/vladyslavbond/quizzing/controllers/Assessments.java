@@ -51,7 +51,7 @@ extends Controller
         try
         {
             return this.create(getStudentFactory( ).getInstance(idOfStudent), getExamFactory( ).getInstance(idOfExam));
-        } catch (StudentFactoryException e)
+        } catch (FactoryException e)
         {
             throw new AssessmentsControllerException (e);
         }
@@ -90,11 +90,6 @@ extends Controller
         {
             throw new AssessmentsControllerException (e);
         }
-    }
-
-    private TaskFactory getTaskFactory()
-    {
-        return Factories.<TaskFactory>getInstance(TaskFactory.class);
     }
 
     public boolean destroy(Long idOfAssessment) throws AssessmentsControllerException
@@ -145,25 +140,5 @@ extends Controller
             throw new AssessmentsControllerException (e);
         }
         return true;
-    }
-
-    private OngoingAssessmentFactory getOngoingAssessmentFactory()
-    {
-        return Factories.<OngoingAssessmentFactory>getInstance(OngoingAssessmentFactory.class);
-    }
-
-    private FinishedAssessmentFactory getFinishedAssessmentFactory()
-    {
-        return Factories.<FinishedAssessmentFactory>getInstance(FinishedAssessmentFactory.class);
-    }
-
-    private ExamFactory getExamFactory()
-    {
-        return Factories.<ExamFactory>getInstance(ExamFactory.class);
-    }
-
-    private StudentFactory getStudentFactory()
-    {
-        return Factories.<StudentFactory>getInstance(StudentFactory.class);
     }
 }

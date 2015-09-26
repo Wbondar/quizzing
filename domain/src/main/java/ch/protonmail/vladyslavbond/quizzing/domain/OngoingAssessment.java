@@ -101,7 +101,8 @@ implements Assessment, Identifiable<OngoingAssessment>
     }
 
     @Override
-    public Set<Answer> getAnswers()
+    public Set<Answer> getAnswers() 
+            throws AnswerFactoryException
     {
         AnswerFactory answerFactory = Factories.<AnswerFactory>getInstance(AnswerFactory.class);
         return answerFactory.getOngoingAssessmentInstances(this.id);

@@ -48,62 +48,65 @@ implements Factory<Option>
         return options;
 	}
 
-	public Option newInstance(Task task, String messageOfOption, Integer reward) throws OptionFactoryException 
+	public Option newInstance(Instructor instructor, Task task, String messageOfOption, Integer reward) throws OptionFactoryException 
 	{
-	    return this.newInstance(task.getId( ), messageOfOption, reward);
+	    return this.newInstance(instructor.getId( ), task.getId( ), messageOfOption, reward);
 	}
 
-	private Option newInstance(Identificator<Task> id, String messageOfOption,
-            Integer reward) throws OptionFactoryException
+	private Option newInstance(Identificator<Instructor> idOfInstructor, Identificator<Task> id, String messageOfOption, Integer reward) 
+	        throws OptionFactoryException
     {
 	      Object[] arguments = {
-	              ((NumericIdentificator<Task>)id).intValue()
+	               idOfInstructor.toNumber().intValue( )
+	              ,((NumericIdentificator<Task>)id).intValue()
 	              ,messageOfOption
 	              ,reward
 	      };
 	      try
 	      {
-	          return this.getDataAccess( ).store("{CALL option_create (?, ?, ?)}", arguments);
+	          return this.getDataAccess( ).store("{CALL option_create (?, ?, ?, ?)}", arguments);
 	      } catch (DataAccessException | MapperException e)
 	      {
 	          throw new OptionFactoryException (e);
 	      }
     }
 
-    public Option update(Option option, Integer reward) throws OptionFactoryException 
+    public Option update(Instructor instructor, Option option, Integer reward) throws OptionFactoryException 
 	{
-        return this.update(option.getId( ), reward);
+        return this.update(instructor.getId( ), option.getId( ), reward);
 	}
 
-	private Option update(Identificator<Option> id, Integer reward) throws OptionFactoryException
+	private Option update(Identificator<Instructor> idOfInstructor, Identificator<Option> id, Integer reward) throws OptionFactoryException
     {
         Object[] arguments = {
-                ((NumericIdentificator<Option>)id).longValue()
+                idOfInstructor.toNumber( ).intValue( )
+                ,((NumericIdentificator<Option>)id).longValue()
                 ,reward
         };
         try
         {
-            return this.getDataAccess( ).store("{CALL option_update_reward (?, ?)}", arguments);
+            return this.getDataAccess( ).store("{CALL option_update_reward (?, ?, ?)}", arguments);
         } catch (DataAccessException | MapperException e)
         {
             throw new OptionFactoryException (e);
         }
     }
 
-	public Option update (Option option, String messageOfOption) throws OptionFactoryException 
+	public Option update (Instructor instructor, Option option, String messageOfOption) throws OptionFactoryException 
 	{
-		return this.update(option.getId( ), messageOfOption);
+		return this.update(instructor.getId( ), option.getId( ), messageOfOption);
 	}
 
-    private Option update(Identificator<Option> id, String messageOfOption) throws OptionFactoryException
+    private Option update(Identificator<Instructor> idOfInstructor, Identificator<Option> id, String messageOfOption) throws OptionFactoryException
     {
         Object[] arguments = {
-                ((NumericIdentificator<Option>)id).longValue()
+                 idOfInstructor.toNumber( ).intValue( )
+                ,((NumericIdentificator<Option>)id).longValue()
                 ,messageOfOption
         };
         try
         {
-            return this.getDataAccess( ).store("{CALL option_update_message (?, ?)}", arguments);
+            return this.getDataAccess( ).store("{CALL option_update_message (?, ?, ?)}", arguments);
         } catch (DataAccessException | MapperException e)
         {
             throw new OptionFactoryException (e);

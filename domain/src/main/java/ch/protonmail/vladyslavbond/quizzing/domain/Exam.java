@@ -23,9 +23,10 @@ implements Identifiable<Exam>
 		this.title = title;
 	}
 	
-	public Set<Pool> getPools ( )
+	public Set<Pool> getPools ( ) 
+	        throws PoolFactoryException
 	{
-		return Factories.<PoolFactory>getInstance(PoolFactory.class).getInstances(this.id);
+		return Factories.<PoolFactory>getInstance(PoolFactory.class).getInstances(this);
 	}
 	
 	Set<Task> getTasks ( ) throws TaskFactoryException

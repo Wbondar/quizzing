@@ -1,0 +1,1 @@
+psql -U postgres -d quizzing -f /home/wbond/Documents/Projects/quizzing/datasource/src/test/sql/data.sql

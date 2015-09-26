@@ -4,6 +4,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import ch.protonmail.vladyslavbond.quizzing.datasource.DataAccessException;
+import ch.protonmail.vladyslavbond.quizzing.datasource.MapperException;
 import ch.protonmail.vladyslavbond.quizzing.util.Identificator;
 import ch.protonmail.vladyslavbond.quizzing.util.NumericIdentificator;
 
@@ -17,109 +18,117 @@ implements Factory<Pool>
     }
 	
 	@Override
-	public Pool getInstance (Identificator<Pool> id) 
+	public Pool getInstance (Identificator<Pool> id) throws PoolFactoryException 
 	{
         Object[] arguments = {
-                ((NumericIdentificator<Pool>)id).longValue()
+                id.toNumber( ).intValue( )
         };
         try
         {
             return this.getDataAccess( ).fetch("SELECT * FROM view_pools WHERE id = ?;", arguments);
-        } catch (DataAccessException e)
+        } catch (MapperException | DataAccessException e)
         {
             throw new PoolFactoryException (e);
-        } finally {
-            return Pool.EMPTY;
         }
 	}
 	
-	public Set<Pool> getInstances (Identificator<Exam> idOfExam)
+	private Set<Pool> getInstances (Identificator<Exam> idOfExam) throws PoolFactoryException
 	{
         Object[] arguments = {
-                ((NumericIdentificator<Exam>)idOfExam).longValue()
+                idOfExam.toNumber( ).intValue( )
         };
         Set<Pool> pools = new HashSet<Pool> ( );
         try
         {
             pools.addAll(this.getDataAccess( ).fetchAll("SELECT * FROM view_exam_pools WHERE exam_id = ?;", arguments));
-        } catch (DataAccessException e)
+        } catch (MapperException | DataAccessException e)
         {
             throw new PoolFactoryException (e);
-        } finally {
-            return java.util.Collections.<Pool>emptySet( );
         }
+        return pools;
+	}
+	
+	public Set<Pool> getInstances (Exam exam) throws PoolFactoryException
+	{
+	    return getInstances(exam.getId( ));
 	}
 
-	public Pool newInstance(Identificator<Instructor> idOfInstructor, String titleOfPool) 
+	private Pool newInstance(Identificator<Instructor> idOfInstructor, String titleOfPool) throws PoolFactoryException 
 	{
       Object[] arguments = {
-                  ((NumericIdentificator<Instructor>)idOfInstructor).longValue()
+                 idOfInstructor.toNumber( ).intValue( )
                 , titleOfPool
       };
       try
       {
           return this.getDataAccess( ).store("{CALL pool_create(?, ?)}", arguments);
-      } catch (DataAccessException e)
+      } catch (MapperException | DataAccessException e)
       {
-          throw new ExamFactoryException (e);
-      } finally {
-          return Pool.EMPTY;
+          throw new PoolFactoryException (e);
       }
 	}
-
-	public Pool update(Pool pool, String titleOfPool) 
+	
+	public Pool newInstance (Instructor instructor, String titleOfPool) throws PoolFactoryException
 	{
-		return this.update(pool.getId( ), titleOfPool);
+	    return newInstance(instructor.getId( ), titleOfPool);
 	}
 
-    private Pool update(Identificator<Pool> id, String titleOfPool)
+	public Pool update(Instructor instructor, Pool pool, String titleOfPool) throws PoolFactoryException 
+	{
+		return this.update(instructor.getId( ), pool.getId( ), titleOfPool);
+	}
+
+    private Pool update(Identificator<Instructor> idOfInstructor, Identificator<Pool> id, String titleOfPool) throws PoolFactoryException
     {
         Object[] arguments = {
-                ((NumericIdentificator<Pool>)id).longValue()
+                idOfInstructor.toNumber().intValue( )
+               ,((NumericIdentificator<Pool>)id).intValue()
                ,titleOfPool
        };
        try
        {
-           return this.getDataAccess( ).store("{CALL pool_update (?, ?)}", arguments);   
-       } catch (DataAccessException e)
+           return this.getDataAccess( ).store("{CALL pool_update (?, ?, ?)}", arguments);   
+       } catch (MapperException | DataAccessException e)
        {
            throw new PoolFactoryException (e);
-       } finally {
-           return Pool.EMPTY;
        }
     }
 
-    public Pool update(Pool pool, Task task, boolean add) 
+    public Pool update(Instructor instructor, Pool pool, Task task, boolean add) throws PoolFactoryException 
 	{
-		return this.update(pool.getId( ), task.getId( ), add);
+		return this.update(instructor.getId( ), pool.getId( ), task.getId( ), add);
 	}
 
-	private Pool update(Identificator<Pool> idOfPool, Identificator<Task> idOfTask,
-            boolean add)
+	private Pool update(Identificator<Instructor> idOfInstructor, Identificator<Pool> idOfPool, Identificator<Task> idOfTask,
+            boolean add) throws PoolFactoryException
     {
         Object[] arguments = {
-                 ((NumericIdentificator<Pool>)idOfPool).longValue()
-                ,((NumericIdentificator<Task>)idOfTask).longValue()
+                  ((NumericIdentificator<Instructor>)idOfInstructor).intValue()
+                , ((NumericIdentificator<Pool>)idOfPool).intValue()
+                , ((NumericIdentificator<Task>)idOfTask).intValue()
         };
         try
         {
             if (add)
             {
-                return this.getDataAccess( ).store("{CALL pool_update_task_add (?, ?)}", arguments);   
+                return this.getDataAccess( ).store("{CALL pool_update_task_add (?, ?, ?)}", arguments);   
             } else {
-                return this.getDataAccess( ).store("{CALL pool_update_task_remove (?, ?)}", arguments);
+                return this.getDataAccess( ).store("{CALL pool_update_task_remove (?, ?, ?)}", arguments);
             }
-        } catch (DataAccessException e)
+        } catch (MapperException | DataAccessException e)
         {
             throw new PoolFactoryException (e);
-        } finally {
-            return Pool.EMPTY;
         }
     }
-
-    public boolean destroy(Pool pool) 
+	
+	private boolean destroy (Identificator<Instructor> idOfInstructor, Identificator<Pool> idOfPool)
 	{
-		// TODO Auto-generated method stub
-		return false;
+	    // TODO Implement deletion of a pool from the database.
+	    return false;
+	}
+
+    public boolean destroy(Instructor instructor, Pool pool) 
+	{
+		return destroy(instructor.getId( ), pool.getId( ));
 	}
 }

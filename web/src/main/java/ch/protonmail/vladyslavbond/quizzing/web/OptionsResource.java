@@ -13,12 +13,17 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
+import ch.protonmail.vladyslavbond.quizzing.controllers.ControllerException;
 import ch.protonmail.vladyslavbond.quizzing.controllers.Controllers;
 import ch.protonmail.vladyslavbond.quizzing.controllers.Options;
 import ch.protonmail.vladyslavbond.quizzing.controllers.OptionsControllerException;
+import ch.protonmail.vladyslavbond.quizzing.controllers.Tasks;
 import ch.protonmail.vladyslavbond.quizzing.domain.Option;
+import ch.protonmail.vladyslavbond.quizzing.domain.Task;
 import ch.protonmail.vladyslavbond.quizzing.util.Identificator;
 import ch.protonmail.vladyslavbond.quizzing.util.NumericIdentificator;
+
+import static ch.protonmail.vladyslavbond.quizzing.web.QuizzingApplication.*;
 
 @Path("/tasks/{task_id : \\d+}/options/")
 public enum OptionsResource
@@ -31,11 +36,11 @@ public enum OptionsResource
     @Path("/new")
     @Produces(MediaType.TEXT_HTML)
     public Response optionCreate (@PathParam("task_id") Integer idOfTask, @FormParam("message") String messageOfOption, @FormParam("reward") Integer reward) 
-            throws URISyntaxException, OptionsControllerException
+            throws URISyntaxException, ControllerException
     {
         Options controller = Controllers.getInstance(Options.class);
-        Option option = Option.EMPTY;
-            option = controller.create(idOfTask, messageOfOption, reward);
+        Task task = Controllers.<Tasks>getInstance(Tasks.class).retrieve(NumericIdentificator.<Task>valueOf(idOfTask));
+        Option option = controller.create(INSTRUCTOR, task, messageOfOption, reward);
         if (option == null || option.equals(Option.EMPTY))
         {
             return Response.status(Status.BAD_REQUEST).build( );
@@ -108,8 +113,8 @@ public enum OptionsResource
     {
         Options controller = Controllers.getInstance(Options.class);
         Identificator<Option> id = NumericIdentificator.<Option>valueOf(idOfOption);
-        Option option = Option.EMPTY;
-            option = controller.update(id, messageOfOption, reward);
+        Option option = controller.retrieve(id);
+        option = controller.update(INSTRUCTOR, option, messageOfOption, reward);
         if (option == null || option.equals(Option.EMPTY))
         {
             return Response.status(Status.BAD_REQUEST).build( );

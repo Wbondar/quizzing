@@ -53,22 +53,33 @@ CREATE TABLE task_types
 )
 ;
 
-Insert into task_types (screen_title) VALUES ('ChoiceMultiple'), ('ChoiceSingle'), ('Guess'), ('WrittenCommunication')
+INSERT INTO task_types (screen_title) 
+VALUES 
+  ('ChoiceMultiple')
+, ('ChoiceSingle')
+, ('Guess')
+, ('WrittenCommunication')
 ;
 
 CREATE TABLE tasks 
 (
 	  id          SERIAL    NOT NULL PRIMARY KEY
 	, type_id     SMALLINT  NOT NULL
-	, creator_id  INTEGER   NOT NULL 
 	, description TEXT      NOT NULL
 	, created_at  TIMESTAMP NOT NULL
 	, FOREIGN KEY (type_id) REFERENCES task_types (id)
 	    ON DELETE RESTRICT
 	    ON UPDATE RESTRICT
-	, FOREIGN KEY (creator_id) REFERENCES members (id)
-	    ON DELETE RESTRICT
-	    ON UPDATE RESTRICT
+)
+;
+
+CREATE TABLE task_owners
+(
+	  task_id   INTEGER NOT NULL 
+	, member_id INTEGER NOT NULL 
+	, PRIMARY KEY (task_id, member_id)
+	, FOREIGN KEY (task_id) REFERENCES tasks (id)
+	, FOREIGN KEY (member_id) REFERENCES members (id)
 )
 ;
 
@@ -85,29 +96,47 @@ SELECT id, type_id, description FROM tasks
 ;
 
 CREATE FUNCTION task_create (arg_member_id INTEGER, arg_type_id SMALLINT, arg_description TEXT)
-RETURNS task AS
+RETURNS SETOF task AS
 $$
-INSERT INTO tasks (id, type_id, description, creator_id, created_at)
-VALUES (DEFAULT, arg_type_id, arg_description, arg_member_id, NOW( ))
-RETURNING id, type_id, description
+DECLARE
+    arg_task_id INTEGER;
+BEGIN
+	INSERT INTO tasks (id, type_id, description, created_at)
+	VALUES (DEFAULT, arg_type_id, arg_description, NOW( ))
+	RETURNING (SELECT id INTO arg_task_id)
+	;
+	INSERT INTO task_owners (task_id, member_id)
+	VALUES (arg_task_id, arg_member_id)
+	;
+	RETURN QUERY SELECT * 
+	FROM view_tasks 
+	WHERE id = arg_task_id 
+	;
+END
 ;
 $$
-LANGUAGE SQL
+LANGUAGE 'plpgsql'
 STRICT
 ;
 
 CREATE FUNCTION task_update (arg_member_id INTEGER, arg_task_id INTEGER, arg_description TEXT)
-RETURNS task AS
+RETURNS SETOF task AS
 $$
-UPDATE tasks 
-SET description = arg_description
-WHERE id = arg_task_id
-;
-SELECT * FROM view_tasks
-where id = arg_task_id
+DECLARE
+BEGIN
+	UPDATE tasks 
+	SET description = arg_description
+	FROM task_owners
+	WHERE CONCAT(task_owners.task_id, task_owners.member_id) = CONCAT(arg_task_id, arg_member_id)
+	AND tasks.id = arg_task_id
+	;
+	RETURN QUERY SELECT * FROM view_tasks
+	WHERE id = arg_task_id
+	;
+END
 ;
 $$
-LANGUAGE SQL
+LANGUAGE 'plpgsql'
 STRICT
 ;
 
@@ -138,48 +167,67 @@ SELECT task_id, id, message, reward
 FROM options
 ;
 
-CREATE FUNCTION option_create (arg_task_id INTEGER, arg_message TEXT, arg_reward INTEGER)
-RETURNS option 
+CREATE FUNCTION option_create (arg_member_id INTEGER, arg_task_id INTEGER, arg_message TEXT, arg_reward INTEGER)
+RETURNS SETOF option 
 AS
 $$
-INSERT INTO options (task_id, id, message, reward)
-VALUES(arg_task_id, DEFAULT, arg_message, arg_reward) 
-RETURNING task_id, id, message, reward
+DECLARE
+	arg_option_id BIGINT;
+BEGIN
+	INSERT INTO options (task_id, id, message, reward)
+	SELECT arg_task_id, nextval('options_id_seq'), arg_message, arg_reward 
+	FROM tasks JOIN task_owners ON tasks.id = task_owners.task_id 
+	WHERE CONCAT(task_owners.task_id, task_owners.member_id) = CONCAT(arg_task_id, arg_member_id)
+	RETURNING (SELECT id INTO arg_option_id)
+	;
+	RETURN QUERY SELECT * 
+	FROM view_options 
+	WHERE id = arg_option_id
+	;
+END
 ;
 $$
-LANGUAGE SQL
+LANGUAGE 'plpgsql'
 STRICT
 ;
 
-CREATE FUNCTION option_update_message (arg_id BIGINT, arg_message TEXT)
-RETURNS option 
+CREATE FUNCTION option_update_message (arg_member_id INTEGER, arg_id BIGINT, arg_message TEXT)
+RETURNS SETOF option 
 AS
 $$
-UPDATE options 
-SET message = arg_message 
-WHERE id = arg_id
-;
-SELECT * FROM view_options 
-WHERE id = arg_id
+DECLARE
+BEGIN
+	UPDATE options 
+	SET message = arg_message 
+	WHERE id = arg_id
+	;
+	RETURN QUERY SELECT * FROM view_options 
+	WHERE id = arg_id
+	;
+END
 ;
 $$
-LANGUAGE SQL
+LANGUAGE 'plpgsql'
 STRICT
 ;
 
-CREATE FUNCTION option_update_reward (arg_id BIGINT, arg_reward INTEGER)
-RETURNS option 
+CREATE FUNCTION option_update_reward (arg_member_id INTEGER, arg_id BIGINT, arg_reward INTEGER)
+RETURNS SETOF option 
 AS
 $$
-UPDATE options 
-SET reward = arg_reward 
-WHERE id = arg_id
-;
-SELECT * FROM view_options 
-WHERE id = arg_id
+DECLARE
+BEGIN
+	UPDATE options 
+	SET reward = arg_reward 
+	WHERE id = arg_id
+	;
+	RETURN QUERY SELECT * FROM view_options 
+	WHERE id = arg_id
+	;
+END
 ;
 $$
-LANGUAGE SQL
+LANGUAGE 'plpgsql'
 STRICT
 ;
 
@@ -189,9 +237,17 @@ CREATE TABLE pools
 (
 	  id         SERIAL       NOT NULL PRIMARY KEY
 	, title      VARCHAR(100) NOT NULL UNIQUE
-	, creator_id INTEGER      NOT NULL
 	, created_at TIMESTAMP    NOT NULL
-	, FOREIGN KEY (creator_id) REFERENCES members (id)
+)
+;
+
+CREATE TABLE pool_owners 
+(
+	  pool_id   INTEGER NOT NULL
+	, member_id INTEGER NOT NULL
+	, PRIMARY KEY (pool_id, member_id)
+	, FOREIGN KEY (pool_id) REFERENCES pools (id)
+	, FOREIGN KEY (member_id) REFERENCES members (id)
 )
 ;
 
@@ -219,64 +275,102 @@ CREATE TABLE pool_tasks
 CREATE VIEW view_pool_tasks AS 
 SELECT pool_tasks.pool_id, view_tasks.* 
 FROM view_tasks JOIN pool_tasks ON pool_tasks.task_id = view_tasks.id 
-ORDER BY RANDOM()
 ;
 
 CREATE FUNCTION pool_create (arg_member_id INTEGER, arg_title VARCHAR(100))
-RETURNS pool AS 
+RETURNS SETOF pool AS 
 $$
-INSERT INTO pools (id, title, creator_id, created_at)
-VALUES (DEFAULT, arg_title, arg_member_id, NOW( ))
-RETURNING id, title 
+DECLARE
+	arg_pool_id INTEGER;
+BEGIN
+	INSERT INTO pools (id, title, created_at)
+	VALUES (DEFAULT, arg_title, NOW( ))
+	RETURNING (SELECT id INTO arg_pool_id)
+	;
+	INSERT INTO pool_owners (pool_id, member_id)
+	VALUES (arg_pool_id, arg_member_id)
+	;
+	RETURN QUERY SELECT * 
+	FROM view_pools 
+	WHERE id = arg_pool_id
+	;
+END
 ;
 $$
-LANGUAGE SQL 
+LANGUAGE 'plpgsql' 
 STRICT 
 ;
 
-CREATE FUNCTION pool_update (arg_pool_id INTEGER, arg_title VARCHAR(100))
-RETURNS pool 
+CREATE FUNCTION pool_update (arg_member_id INTEGER, arg_pool_id INTEGER, arg_title VARCHAR(100))
+RETURNS SETOF pool 
 AS
 $$
-UPDATE pools 
-SET title = arg_title 
-WHERE id = arg_pool_id
-;
-SELECT * FROM view_pools 
-WHERE id = arg_pool_id
+DECLARE 
+BEGIN
+	UPDATE pools 
+	SET title = arg_title
+	FROM pool_owners
+	WHERE CONCAT(pool_owners.pool_id, pool_owners.member_id) = CONCAT(arg_pool_id, arg_member_id)
+	AND pools.id = arg_pool_id
+	;
+	RETURN QUERY SELECT * FROM view_pools 
+	WHERE id = arg_pool_id
+	;
+END 
 ;
 $$
-LANGUAGE SQL 
+LANGUAGE 'plpgsql' 
 STRICT
 ;
 
-CREATE FUNCTION pool_update_task_add (arg_pool_id INTEGER, arg_task_id INTEGER)
-RETURNS pool 
+CREATE FUNCTION pool_update_task_add (arg_member_id INTEGER, arg_pool_id INTEGER, arg_task_id INTEGER)
+RETURNS SETOF pool 
 AS
 $$
-INSERT INTO pool_tasks (pool_id, task_id)
-VALUES (arg_pool_id, arg_task_id)
-;
-SELECT * FROM view_pools 
-WHERE id = arg_pool_id
+DECLARE
+BEGIN
+	PERFORM * FROM pool_update_task_remove (arg_member_id, arg_pool_id, arg_task_id)
+	;
+	INSERT INTO pool_tasks (pool_id, task_id)
+	SELECT pool_owners.pool_id, arg_task_id 
+	FROM pool_owners
+	WHERE CONCAT(pool_owners.pool_id, pool_owners.member_id) = CONCAT(arg_pool_id, arg_member_id)
+	LIMIT 1
+	;
+	RETURN QUERY SELECT * 
+	FROM view_pools 
+	WHERE id = arg_pool_id
+	;
+END
 ;
 $$
-LANGUAGE SQL 
+LANGUAGE 'plpgsql' 
 STRICT
 ;
 
-CREATE FUNCTION pool_update_task_remove (arg_pool_id INTEGER, arg_task_id INTEGER)
-RETURNS pool 
+CREATE FUNCTION pool_update_task_remove (arg_member_id INTEGER, arg_pool_id INTEGER, arg_task_id INTEGER)
+RETURNS SETOF pool 
 AS
 $$
-DELETE FROM pool_tasks
-WHERE CONCAT(pool_id, task_id) = CONCAT(arg_pool_id, arg_task_id)
-;
-SELECT * FROM view_pools 
-WHERE id = arg_pool_id
+DECLARE
+BEGIN
+	PERFORM * 
+	FROM pool_owners
+	WHERE CONCAT(pool_owners.pool_id, pool_owners.member_id) = CONCAT(arg_pool_id, arg_member_id)
+	;
+	IF FOUND THEN 
+		DELETE FROM pool_tasks
+		WHERE CONCAT(pool_id, task_id) = CONCAT(arg_pool_id, arg_task_id)
+		;
+	END IF 
+	;
+	RETURN QUERY SELECT * FROM view_pools 
+	WHERE id = arg_pool_id
+	;
+END
 ;
 $$
-LANGUAGE SQL 
+LANGUAGE 'plpgsql' 
 STRICT
 ;
 
@@ -292,6 +386,16 @@ CREATE TABLE exams
 )
 ;
 
+CREATE TABLE exam_owners 
+(
+	  exam_id INTEGER NOT NULL 
+	, member_id INTEGER NOT NULL
+	, PRIMARY KEY (exam_id, member_id)
+	, FOREIGN KEY (exam_id) REFERENCES exams (id)
+	, FOREIGN KEY (member_id) REFERENCES members (id)
+)
+;
+
 CREATE TYPE exam AS
 (
 	  id    INTEGER
@@ -304,14 +408,24 @@ SELECT id, title FROM exams
 ;
 
 CREATE FUNCTION exam_create (arg_member_id INTEGER, arg_title VARCHAR(100))
-RETURNS exam AS
+RETURNS SETOF exam AS
 $$
-INSERT INTO exams (id, title, creator_id, created_at)
-VALUES (DEFAULT, arg_title, arg_member_id, NOW( ))
-RETURNING id, title
+DECLARE
+	var_exam_id INTEGER;
+BEGIN
+	INSERT INTO exams (id, title, creator_id, created_at)
+	VALUES (DEFAULT, arg_title, arg_member_id, NOW( ))
+	RETURNING (SELECT id INTO var_exam_id)
+	;
+	INSERT INTO exam_owners (exam_id, member_id)
+	VALUES (var_exam_id, arg_member_id)
+	;
+	RETURN QUERY SELECT * FROM view_exams WHERE id = var_exam_id
+	;
+END
 ;
 $$
-LANGUAGE SQL
+LANGUAGE 'plpgsql'
 STRICT
 ;
 
@@ -331,36 +445,58 @@ SELECT exam_pools.exam_id, view_pools.*
 FROM view_pools JOIN exam_pools ON view_pools.id = exam_pools.pool_id
 ;
 
-CREATE FUNCTION exam_update_pool_add (arg_exam_id INTEGER, arg_pool_id INTEGER, arg_quantity INTEGER)
-RETURNS exam AS
+CREATE FUNCTION exam_update_pool_add (arg_member_id INTEGER, arg_exam_id INTEGER, arg_pool_id INTEGER, arg_quantity INTEGER)
+RETURNS SETOF exam AS
 $$
-DELETE FROM exam_pools 
-WHERE CONCAT(exam_id, pool_id) = CONCAT(arg_exam_id, arg_pool_id)
-;
-INSERT INTO exam_pools (exam_id, pool_id, quantity)
-VALUES (arg_exam_id, arg_pool_id, arg_quantity)
-;
-SELECT * 
-FROM view_exams 
-WHERE id = arg_exam_id
+DECLARE 
+BEGIN
+	SELECT *
+	FROM exam_owners
+	WHERE CONCAT(exam_owners.exam_id, exam_owners.member_id) = CONCAT(arg_exam_id, arg_member_id)
+	;
+	IF FOUND THEN
+		DELETE FROM exam_pools 
+		WHERE CONCAT(exam_id, pool_id) = CONCAT(arg_exam_id, arg_pool_id)
+		;
+		INSERT INTO exam_pools (exam_id, pool_id, quantity)
+		VALUES (arg_exam_id, arg_pool_id, arg_quantity)
+		;
+	END IF 
+	;
+	RETURN QUERY SELECT * 
+	FROM view_exams 
+	WHERE id = arg_exam_id
+	;
+END
 ; 
 $$
-LANGUAGE SQL 
+LANGUAGE 'plpgsql' 
 STRICT
 ;
 
-CREATE FUNCTION exam_update_pool_remove (arg_exam_id INTEGER, arg_pool_id INTEGER)
-RETURNS exam AS
+CREATE FUNCTION exam_update_pool_remove (arg_member_id INTEGER, arg_exam_id INTEGER, arg_pool_id INTEGER)
+RETURNS SETOF exam AS
 $$
-DELETE FROM exam_pools 
-WHERE CONCAT(exam_id, pool_id) = CONCAT(arg_exam_id, arg_pool_id)
+DECLARE
+BEGIN
+	SELECT *
+	FROM exam_owners
+	WHERE CONCAT(exam_owners.exam_id, exam_owners.member_id) = CONCAT(arg_exam_id, arg_member_id)
+	;
+	IF FOUND THEN
+		DELETE FROM exam_pools 
+		WHERE CONCAT(exam_id, pool_id) = CONCAT(arg_exam_id, arg_pool_id)
+		;
+	END IF 
+	;
+	RETURN QUERY SELECT * 
+	FROM view_exams 
+	WHERE id = arg_exam_id
+	; 
+END
 ;
-SELECT * 
-FROM view_exams 
-WHERE id = arg_exam_id
-; 
 $$
-LANGUAGE SQL 
+LANGUAGE 'plpgsql'
 STRICT
 ;
 
@@ -412,15 +548,21 @@ FROM view_tasks JOIN assessment_tasks ON view_tasks.id = assessment_tasks.task_i
 ;
 
 CREATE FUNCTION assessment_ongoing_create (arg_student_id INTEGER, arg_exam_id INTEGER)
-RETURNS assessment 
+RETURNS SETOF assessment 
 AS
 $$
-INSERT INTO assessments (id, student_id, exam_id, taken_at)
-VALUES (DEFAULT, arg_student_id, arg_exam_id, NOW( ))
-RETURNING id, student_id, exam_id
+DECLARE
+	var_assessment_id BIGINT;
+BEGIN
+	INSERT INTO assessments (id, student_id, exam_id, taken_at)
+	VALUES (DEFAULT, arg_student_id, arg_exam_id, NOW( ))
+	RETURNING (SELECT id INTO var_assessment_id)
+	;
+	RETURN QUERY SELECT * FROM view_ongoing_assessments WHERE id = var_assessment_id;
+END
 ;
 $$
-LANGUAGE SQL
+LANGUAGE 'plpgsql'
 STRICT
 ;
 
@@ -452,14 +594,20 @@ SELECT id, assessment_id, task_id, input FROM answers
 ;
 
 CREATE FUNCTION answer_create (arg_assessment_id BIGINT, arg_task_id INTEGER, arg_input TEXT)
-RETURNS answer AS 
+RETURNS SETOF answer AS 
 $$
-INSERT INTO answers (id, assessment_id, task_id, input, provided_at)
-VALUES (DEFAULT, arg_assessment_id, arg_task_id, arg_input, NOW( ))
-RETURNING id, assessment_id, task_id, input
-;
+DECLARE
+	var_answer_id BIGINT;
+BEGIN
+	INSERT INTO answers (id, assessment_id, task_id, input, provided_at)
+	VALUES (DEFAULT, arg_assessment_id, arg_task_id, arg_input, NOW( ))
+	RETURNING (SELECT id INTO var_answer_id)
+	;
+	RETURN QUERY SELECT * FROM view_answers WHERE id = var_answer_id
+	;
+END
 $$
-LANGUAGE SQL 
+LANGUAGE 'plpgsql' 
 STRICT 
 ;
 

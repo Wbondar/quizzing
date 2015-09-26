@@ -9,12 +9,14 @@ import static org.junit.Assert.*;
 import java.util.Random;
 
 import org.junit.After;
-import org.junit.AfterClass;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
+import ch.protonmail.vladyslavbond.quizzing.domain.Factories;
 import ch.protonmail.vladyslavbond.quizzing.domain.Instructor;
+import ch.protonmail.vladyslavbond.quizzing.domain.InstructorFactory;
+import ch.protonmail.vladyslavbond.quizzing.domain.Member;
+import ch.protonmail.vladyslavbond.quizzing.domain.MemberFactory;
 import ch.protonmail.vladyslavbond.quizzing.domain.Task;
 import ch.protonmail.vladyslavbond.quizzing.domain.TaskType;
 import ch.protonmail.vladyslavbond.quizzing.util.Identificator;
@@ -32,6 +34,7 @@ public class TasksTest
     private transient String                    description;
     private transient String                    updatedDescription;
     private transient Identificator<Instructor> instructorId;
+    private transient Instructor                instructor;
     private transient Tasks                     controller;
     
     /**
@@ -41,7 +44,10 @@ public class TasksTest
     public void setUp() throws Exception
     {
         this.controller   = Controllers.getInstance(Tasks.class);
-        this.instructorId = NumericIdentificator.<Instructor>valueOf(1);
+        String taskstester = "taskstester" + (new Random ( )).nextInt( );
+        Member member = Factories.<MemberFactory>getInstance(MemberFactory.class).newInstance(taskstester, taskstester);
+        this.instructor = Factories.<InstructorFactory>getInstance(InstructorFactory.class).getInstance(NumericIdentificator.<Instructor>valueOf(member.getId( ).toNumber( ).intValue( )));
+        this.instructorId = instructor.getId( );
         this.taskType     = TaskType.valueOf((new Random( )).nextInt(3) + 1);
         this.description  = "Description of a test task.";
         this.updatedDescription  = "Updated description of a test task.";
@@ -49,7 +55,7 @@ public class TasksTest
     
     private void create ( ) throws TasksControllerException
     {
-        this.task = controller.create(instructorId, taskType, description);
+        this.task = controller.create(instructor, taskType, description);
         this.taskId = task.getId( );
         assertEquals(description, task.getDescription( ));   
     }
@@ -67,7 +73,7 @@ public class TasksTest
     
     private void updateDescription ( ) throws TasksControllerException
     {
-        Task updatedTask = controller.update(instructorId, taskId, updatedDescription);
+        Task updatedTask = controller.update(instructor, task, updatedDescription);
         assertEquals(updatedDescription, updatedTask.getDescription( ));
         /*
          * Domain classes, such as task, in this application are only immutable descriptors.

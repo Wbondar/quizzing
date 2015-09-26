@@ -46,28 +46,39 @@ implements Factory<Answer>
         }
 	}
 	
-	Set<Answer> getInstances (long id)
+	private Set<Answer> getInstances (long id) 
+	        throws AnswerFactoryException
 	{
         Set<Answer> answers = new HashSet<Answer> ( );
         try
         {
             answers.addAll(this.getDataAccess( ).fetchAll("SELECT * FROM view_answers WHERE assessment_id = ?;", id));
             return answers;
-        } catch (DataAccessException e)
+        } catch (MapperException | DataAccessException e)
         {
             throw new AnswerFactoryException (e);
-        } finally {
-            return answers;   
         }
 	}
 
-    public Set<Answer> getOngoingAssessmentInstances(Identificator<OngoingAssessment> id)
+    public Set<Answer> getOngoingAssessmentInstances(Identificator<OngoingAssessment> id) 
+            throws AnswerFactoryException
     {
         return this.getInstances(((NumericIdentificator<OngoingAssessment>)id).longValue( ));
     }
 
-    public Set<Answer> getFinishedAssessmentInstances(Identificator<FinishedAssessment> id)
+    public Set<Answer> getFinishedAssessmentInstances(Identificator<FinishedAssessment> id) 
+            throws AnswerFactoryException
     {
         return this.getInstances(((NumericIdentificator<FinishedAssessment>)id).longValue( ));
+    }
+
+    public Set<Answer> getInstances(FinishedAssessment finishedAssessment) throws AnswerFactoryException
+    {
+        return getFinishedAssessmentInstances(finishedAssessment.getId( ));
+    }
+
+    public Set<Answer> getInstances(OngoingAssessment ongoingAssessment) throws AnswerFactoryException
+    {
+        return getOngoingAssessmentInstances(ongoingAssessment.getId( ));
     }
 }

@@ -25,8 +25,13 @@ implements Identifiable<Pool>
 	
 	public Set<Task> getTasks (int quantityOfTasksToBeFetched) throws TaskFactoryException
 	{
-		return Factories.<TaskFactory>getInstance(TaskFactory.class).getInstances(this.id, quantityOfTasksToBeFetched);
+		return Factories.<TaskFactory>getInstance(TaskFactory.class).getInstances(this, quantityOfTasksToBeFetched);
 	}
+
+    public Set<Task> getTasks() throws TaskFactoryException
+    {
+        return Factories.<TaskFactory>getInstance(TaskFactory.class).getInstances(this);
+    }
 	
 	private final String title;
 	

@@ -89,12 +89,12 @@ implements Factory<Task>
         }
 	}
 
-    public Task newInstance(Identificator<Instructor> idOfInstructor, TaskType taskType, String description)
+    private Task newInstance(Identificator<Instructor> idOfInstructor, TaskType taskType, String description)
         throws TaskFactoryException
     {
         Object[] arguments = {
-                  ((NumericIdentificator<Instructor>)idOfInstructor).intValue( )
-                , ((NumericIdentificator<TaskType>)taskType.getId( )).shortValue( )
+                  idOfInstructor.toNumber( ).intValue( )
+                , taskType.getId( ).toNumber( ).shortValue( )
                 , description
         };
         try
@@ -106,20 +106,81 @@ implements Factory<Task>
         }
     }
 
+    public Task newInstance(Instructor instructor, TaskType taskType, String description) 
+            throws TaskFactoryException
+    {
+        return this.newInstance(instructor.getId( ), taskType, description);
+    }
+
     public Set<Task> getOngoingAssessmentInstances(Identificator<OngoingAssessment> id) throws TaskFactoryException
     {
-        return this.getAssessmentInstances(((NumericIdentificator<OngoingAssessment>)id).longValue( ));
+        return this.getAssessmentInstances(id.toNumber( ).longValue( ));
     }
 
     public Set<Task> getFinishedAssessmentInstances(Identificator<FinishedAssessment> id) throws TaskFactoryException
     {
-        return this.getAssessmentInstances(((NumericIdentificator<FinishedAssessment>)id).longValue( ));
+        return this.getAssessmentInstances(id.toNumber( ).longValue( ));
     }
 
-    public Set<Task> getInstances(Identificator<Pool> id,
-            int quantityOfTasksToBeFetched) throws TaskFactoryException
+    public Set<Task> getInstances(OngoingAssessment assessment) 
+            throws TaskFactoryException
     {
-        // TODO Auto-generated method stub
-        return this.getInstances(Exam.EMPTY);
+        return this.getOngoingAssessmentInstances(assessment.getId( ));
+    }
+
+    public Set<Task> getInstances(FinishedAssessment assessment) 
+            throws TaskFactoryException
+    {
+        return this.getFinishedAssessmentInstances(assessment.getId( ));
+    }
+
+    private Set<Task> getPoolInstances(Identificator<Pool> id, int quantity) 
+            throws TaskFactoryException
+    {
+        if (quantity < 1)
+        {
+            quantity = 1;
+        }
+        Object[] arguments = {
+              id.toNumber( ).intValue( )
+        };
+        Set<Task> tasks = new HashSet<Task> ( );
+        try
+        {
+            tasks.addAll(this.getDataAccess( ).fetchAll(String.format("SELECT * FROM view_pool_tasks WHERE pool_id = ? ORDER BY RANDOM() LIMIT %d;", quantity), arguments));
+        } 
+        catch (MapperException | DataAccessException e)
+        {
+            throw new TaskFactoryException ("Failed retrieve tasks by pool.", e);
+        }
+        return tasks;
+    }
+
+    public Set<Task> getInstances(Pool pool, int quantityOfTasksToBeFetched) 
+            throws TaskFactoryException
+    {
+        return getPoolInstances(pool.getId( ), quantityOfTasksToBeFetched);
+    }
+    
+    private Set<Task> getAllPoolInstances (Identificator<Pool> idOfPool) throws TaskFactoryException
+    {
+        Object[] arguments = {
+                idOfPool.toNumber( ).intValue( )
+          };
+          Set<Task> tasks = new HashSet<Task> ( );
+          try
+          {
+              tasks.addAll(this.getDataAccess( ).fetchAll("SELECT * FROM view_pool_tasks WHERE pool_id = ?;", arguments));
+          } 
+          catch (MapperException | DataAccessException e)
+          {
+              throw new TaskFactoryException ("Failed retrieve tasks by pool.", e);
+          }
+          return tasks; 
+    }
+    
+    public Set<Task> getInstances (Pool pool) throws TaskFactoryException
+    {
+        return getAllPoolInstances(pool.getId( ));
     }
 }

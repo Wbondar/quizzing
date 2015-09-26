@@ -2,6 +2,7 @@ package ch.protonmail.vladyslavbond.quizzing.domain;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Set;
 
 import ch.protonmail.vladyslavbond.quizzing.util.Identifiable;
@@ -17,6 +18,7 @@ implements Assessment, Identifiable<FinishedAssessment>
     private final Student student;
     private final Set<Task> tasks;
     private final Set<Answer> answers;
+    private final Set<Score> scores;
     
 	private FinishedAssessment ( )
 	{
@@ -24,14 +26,16 @@ implements Assessment, Identifiable<FinishedAssessment>
 		this.student = Student.EMPTY;
 		this.tasks   = Collections.<Task>emptySet( );
 		this.answers = Collections.<Answer>emptySet( );
+		this.scores = Collections.<Score>emptySet( );
 	}
 	
-	FinishedAssessment (Identificator<FinishedAssessment> id, Student student, Set<Task> tasks, Set<Answer> answers)
+	FinishedAssessment (Identificator<FinishedAssessment> id, Student student, Set<Task> tasks, Set<Answer> answers, Set<Score> scores)
 	{
 		this.id      = id;
 		this.student = student;
 		this.tasks   = Collections.<Task>unmodifiableSet(tasks);
 		this.answers = Collections.<Answer>unmodifiableSet(answers);
+		this.scores  = Collections.<Score>unmodifiableSet(scores);
 	}
 	
 	@Override
@@ -65,6 +69,10 @@ implements Assessment, Identifiable<FinishedAssessment>
 		{
 			return false;
 		}
+		if (o == this)
+		{
+		    return true;
+		}
 		if (o instanceof FinishedAssessment)
 		{
 			return o.hashCode( ) == this.hashCode( );
@@ -79,21 +87,27 @@ implements Assessment, Identifiable<FinishedAssessment>
 	}
 
     @Override
-    public Set<Answer> getAnswers(Task task)
+    public Set<Answer> getAnswers(Task task) 
     {
-        // TODO Auto-generated method stub
-        return null;
+        Set<Answer> foundAnswers = new HashSet<Answer> ( );
+        for (Answer answer : this.answers)
+        {
+            if (answer.getTask( ).getId( ).equals(task.getId( )))
+            {
+                foundAnswers.add(answer);
+            }
+        }
+        return foundAnswers;
     }
 
-    public Collection<Score> getScores()
+    public Collection<Score> getScores ( )
     {
-        ScoreFactory scoreFactory = Factories.<ScoreFactory>getInstance(ScoreFactory.class);
-        return scoreFactory.getInstances(this.id);
+        return this.scores;
     }
 
-    public Score getScores(Task task)
+    public Score getScores(Task task) 
     {
-        for (Score score : this.getScores( ))
+        for (Score score : this.scores)
         {
             if (score.getTask( ).getId( ).equals(task.getId( )))
             {

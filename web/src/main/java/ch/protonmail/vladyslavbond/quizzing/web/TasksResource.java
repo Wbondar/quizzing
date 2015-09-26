@@ -2,6 +2,7 @@ package ch.protonmail.vladyslavbond.quizzing.web;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Random;
 
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
@@ -13,28 +14,17 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
-import ch.protonmail.vladyslavbond.quizzing.controllers.ControllerException;
-import ch.protonmail.vladyslavbond.quizzing.controllers.Controllers;
-import ch.protonmail.vladyslavbond.quizzing.controllers.Options;
-import ch.protonmail.vladyslavbond.quizzing.controllers.OptionsControllerException;
-import ch.protonmail.vladyslavbond.quizzing.controllers.Pools;
-import ch.protonmail.vladyslavbond.quizzing.controllers.Tasks;
-import ch.protonmail.vladyslavbond.quizzing.controllers.TasksControllerException;
-import ch.protonmail.vladyslavbond.quizzing.domain.Instructor;
-import ch.protonmail.vladyslavbond.quizzing.domain.Option;
-import ch.protonmail.vladyslavbond.quizzing.domain.Pool;
-import ch.protonmail.vladyslavbond.quizzing.domain.Task;
-import ch.protonmail.vladyslavbond.quizzing.domain.TaskType;
+import ch.protonmail.vladyslavbond.quizzing.controllers.*;
+import ch.protonmail.vladyslavbond.quizzing.domain.*;
 import ch.protonmail.vladyslavbond.quizzing.util.Identificator;
 import ch.protonmail.vladyslavbond.quizzing.util.NumericIdentificator;
+
+import static ch.protonmail.vladyslavbond.quizzing.web.QuizzingApplication.*;
 
 @Path("/tasks")
 public enum TasksResource
 {
     INSTANCE;
-    
-    private final static Identificator<Instructor> ID_OF_INSTRUCTOR = NumericIdentificator.<Instructor>valueOf(1);
-    private final static Identificator<Pool>       ID_OF_POOL       = NumericIdentificator.<Pool>valueOf(1);
     
     private TasksResource ( ) {}
 
@@ -45,7 +35,7 @@ public enum TasksResource
             throws URISyntaxException, ControllerException
     {
         Tasks controller = Controllers.<Tasks>getInstance(Tasks.class);
-        Task task = controller.create(ID_OF_INSTRUCTOR, idOfTaskType, description);
+        Task task = controller.create(INSTRUCTOR, idOfTaskType, description);
         
         if (task == null || task.equals(Task.EMPTY))
         {
@@ -57,7 +47,12 @@ public enum TasksResource
          * Remove it in production.
          */
         Pools poolsController = Controllers.<Pools>getInstance(Pools.class);
-        poolsController.updateTaskAdd(ID_OF_POOL, task.getId( ));
+        Pool pool = poolsController.updateTaskAdd(INSTRUCTOR, POOL, task);
+        
+        if (pool == null || pool.equals(Pool.EMPTY))
+        {
+            return Response.serverError( ).build( );
+        }
         Long idOfTask = Long.valueOf(task.getId( ).toString( ));
         return Response.seeOther(new URI (String.format("/tasks/%d", idOfTask))).build( );   
     }
@@ -146,8 +141,8 @@ public enum TasksResource
             throws URISyntaxException, TasksControllerException
     {
         Tasks controller = Controllers.getInstance(Tasks.class);
-        Task task = Task.EMPTY;
-        task = controller.update(ID_OF_INSTRUCTOR, NumericIdentificator.<Task>valueOf(idOfTask), description);
+        Task task = controller.retrieve(NumericIdentificator.<Task>valueOf(idOfTask));
+        task = controller.update(INSTRUCTOR, task, description);
         if (task == null || task.equals(Option.EMPTY))
         {
             return Response.status(Status.BAD_REQUEST).build( );

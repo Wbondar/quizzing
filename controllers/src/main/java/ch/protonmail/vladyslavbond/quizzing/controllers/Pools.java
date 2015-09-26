@@ -5,69 +5,122 @@ import ch.protonmail.vladyslavbond.quizzing.util.Identificator;
 
 public final class Pools 
 extends Controller 
-{
+{   
     public Pool create (Instructor instructor, String titleOfPool) 
+            throws PoolsControllerException 
     {
-        Pool pool = getPoolFactory( ).newInstance(instructor.getId( ), titleOfPool);
-        if (pool == null || pool.equals(Pool.EMPTY))
+        Pool pool = Pool.EMPTY;
+        try
         {
-            return Pool.EMPTY;
+            pool = getPoolFactory( ).newInstance(instructor, titleOfPool);
+        } catch (PoolFactoryException e)
+        {
+            throw new PoolsControllerException (e);
         }
         return pool;
     }
     
-    private InstructorFactory getInstructorFactory ( )
-    {
-        return Factories.<InstructorFactory>getInstance(InstructorFactory.class);
-    }
-    
-    public Pool create (Identificator<Instructor> idOfInstructor, String titleOfPool) throws PoolsControllerException
+    public Pool create (Identificator<Instructor> idOfInstructor, String titleOfPool) 
+            throws PoolsControllerException
     {
         try
         {
-            return this.create(getInstructorFactory( ).getInstance(idOfInstructor), titleOfPool);
+            Pool pool = this.create(getInstructorFactory( ).getInstance(idOfInstructor), titleOfPool);
+            if (pool == null)
+            {
+                return Pool.EMPTY;
+            }
+            return pool;
         } catch (InstructorFactoryException e)
         {
             throw new PoolsControllerException (e);
         }
     }
     
-    public Pool updateTaskAdd (Pool pool, Task task) 
+    public Pool retrieve (Identificator<Pool> idOfPool) 
+            throws PoolsControllerException
     {
-        pool = getPoolFactory( ).update(pool, task, true);
-        if (pool == null || pool.equals(Pool.EMPTY))
+        Pool pool = Pool.EMPTY;
+        try
         {
-            return Pool.EMPTY;
+            pool = getPoolFactory( ).getInstance(idOfPool);
+        } catch (PoolFactoryException e)
+        {
+            throw new PoolsControllerException (e);
         }
         return pool;
     }
     
-    public Pool updateTaskRemove (Pool pool, Task task) 
-    {
-        pool = getPoolFactory( ).update(pool, task, false);
-        if (pool == null || pool.equals(Pool.EMPTY))
-        {
-            return Pool.EMPTY;
-        }
-        return pool;
-    }
-    
-    private final PoolFactory getPoolFactory ( )
-    {
-        return Factories.<PoolFactory>getInstance(PoolFactory.class);
-    }
-    
-    private final TaskFactory getTaskFactory ( )
-    {
-        return Factories.<TaskFactory>getInstance(TaskFactory.class);
-    }
-
-    public Pool updateTaskAdd (Identificator<Pool> idOfPool, Identificator<Task> id) throws PoolsControllerException
+    public Pool update (Instructor instructor, Pool pool, String newTitle)
+            throws PoolsControllerException
     {
         try
         {
-            return updateTaskAdd(getPoolFactory( ).getInstance(idOfPool), getTaskFactory( ).getInstance(id));
-        } catch (TaskFactoryException e)
+            Pool updatedPool = getPoolFactory( ).update(instructor, pool, newTitle);
+            if (updatedPool == null)
+            {
+                return Pool.EMPTY;
+            }
+            return updatedPool;
+        } catch (PoolFactoryException e)
+        {
+            throw new PoolsControllerException ("Failed to update title of a pool.", e);
+        }
+    }
+    
+    public Pool updateTaskAdd (Instructor instructor, Pool pool, Task task) 
+            throws PoolsControllerException 
+    {
+        try
+        {
+            if (instructor == null)
+            {
+                throw new PoolsControllerException ("Instructor is missing.");
+            }
+            if (pool == null)
+            {
+                throw new PoolsControllerException ("Pool is missing.");
+            }
+            if (task == null)
+            {
+                throw new PoolsControllerException ("Task is missing.");
+            }
+            Pool updatedPool = getPoolFactory( ).update(instructor, pool, task, true);
+            if (updatedPool == null)
+            {
+                return Pool.EMPTY;
+            }
+            return updatedPool;
+        } catch (PoolFactoryException e)
+        {
+            throw new PoolsControllerException ("Failed to add a task to a pool.", e);
+        }
+    }
+    
+    public Pool updateTaskRemove (Instructor instructor, Pool pool, Task task) 
+            throws PoolsControllerException 
+    {
+        try
+        {
+            Pool updatedPool = getPoolFactory( ).update(instructor, pool, task, false);
+            if (updatedPool == null)
+            {
+                return Pool.EMPTY;
+            }
+            return updatedPool;
+        } catch (PoolFactoryException e)
+        {
+            throw new PoolsControllerException (e);
+        }
+    }
+
+    public Pool updateTaskAdd (Identificator<Instructor> idOfInstructor, Identificator<Pool> idOfPool, Identificator<Task> id) 
+            throws PoolsControllerException
+    {
+        try
+        {
+            return updateTaskAdd(getInstructorFactory( ).getInstance(idOfInstructor), getPoolFactory( ).getInstance(idOfPool), getTaskFactory( ).getInstance(id));
+        } catch (FactoryException e)
         {
             throw new PoolsControllerException (e);
         }

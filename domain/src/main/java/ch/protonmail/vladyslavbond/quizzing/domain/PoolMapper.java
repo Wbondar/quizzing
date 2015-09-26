@@ -15,7 +15,7 @@ class PoolMapper extends NativeMapper<Pool>
     @Override
     public Pool build ( ) throws PoolMapperException, MapperException
     {
-        Identificator<Pool> id = NumericIdentificator.<Pool>valueOf(this.<Long>get("id", Long.class));
+        Identificator<Pool> id = NumericIdentificator.<Pool>valueOf(this.<Integer>get("id", Integer.class));
         String title = this.<String>get("title", String.class);
         Pool pool = new Pool (id, title);
         return pool;

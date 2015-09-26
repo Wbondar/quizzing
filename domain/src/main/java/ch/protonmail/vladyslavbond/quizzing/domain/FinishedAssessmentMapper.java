@@ -38,8 +38,24 @@ extends NativeMapper<FinishedAssessment>
         {
             throw new FinishedAssessmentMapperException ("Failed to get tasks of the assessment.", e);
         }
-        Set<Answer> answers =  Factories.<AnswerFactory>getInstance(AnswerFactory.class).getFinishedAssessmentInstances(id);
-        FinishedAssessment assessment = new FinishedAssessment (id, student, tasks, answers);
+        Set<Answer> answers;
+        try
+        {
+            answers = Factories.<AnswerFactory>getInstance(AnswerFactory.class).getFinishedAssessmentInstances(id);
+        } catch (AnswerFactoryException e)
+        {
+            throw new FinishedAssessmentMapperException ("Failed to get answers.", e);
+        }
+        ScoreFactory scoreFactory = Factories.<ScoreFactory>getInstance(ScoreFactory.class);
+        Set<Score> scores;
+        try
+        {
+            scores = scoreFactory.getInstances(id);
+        } catch (ScoreFactoryException e)
+        {
+            throw new FinishedAssessmentMapperException ("Failed to get scores.", e);
+        }
+        FinishedAssessment assessment = new FinishedAssessment (id, student, tasks, answers, scores);
         return assessment;
     }
 

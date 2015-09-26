@@ -25,6 +25,7 @@ import ch.protonmail.vladyslavbond.quizzing.domain.FinishedAssessment;
 import ch.protonmail.vladyslavbond.quizzing.domain.OngoingAssessment;
 import ch.protonmail.vladyslavbond.quizzing.domain.Option;
 import ch.protonmail.vladyslavbond.quizzing.domain.Score;
+import ch.protonmail.vladyslavbond.quizzing.domain.ScoreFactoryException;
 import ch.protonmail.vladyslavbond.quizzing.domain.Student;
 import ch.protonmail.vladyslavbond.quizzing.domain.Task;
 import ch.protonmail.vladyslavbond.quizzing.domain.TaskFactoryException;
@@ -60,7 +61,7 @@ public enum AssessmentsResource
     @GET
     @Path("/{id : \\d+}")
     @Produces (MediaType.TEXT_HTML)
-    public Response assessmentRetrieve (@PathParam("id") Long idOfAssessment) throws AssessmentsControllerException, NumberFormatException, TaskFactoryException, AnswerFactoryException 
+    public Response assessmentRetrieve (@PathParam("id") Long idOfAssessment) throws AssessmentsControllerException, NumberFormatException, TaskFactoryException, AnswerFactoryException, ScoreFactoryException 
     {
         Assessments controller = Controllers.<Assessments>getInstance(Assessments.class);
         Assessment assessment = FinishedAssessment.EMPTY;

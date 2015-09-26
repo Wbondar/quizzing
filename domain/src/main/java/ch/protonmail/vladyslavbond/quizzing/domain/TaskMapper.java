@@ -3,7 +3,6 @@ package ch.protonmail.vladyslavbond.quizzing.domain;
 import java.util.Set;
 
 import ch.protonmail.vladyslavbond.quizzing.datasource.Mapper;
-import ch.protonmail.vladyslavbond.quizzing.datasource.MapperException;
 import ch.protonmail.vladyslavbond.quizzing.util.Identificator;
 import ch.protonmail.vladyslavbond.quizzing.util.NumericIdentificator;
 

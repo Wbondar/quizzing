@@ -7,23 +7,24 @@ import ch.protonmail.vladyslavbond.quizzing.util.NumericIdentificator;
 public class Tasks 
 extends Controller 
 {   
-    private TaskFactory getTaskFactory ( )
-    {
-        return Factories.<TaskFactory>getInstance(TaskFactory.class);
-    }
 
-    public Task create(Identificator<Instructor> idOfInstructor, Integer idOfTaskType, String description)
+    public Task create(Instructor instructor, Integer idOfTaskType, String description)
         throws TasksControllerException
     {
-        return create(idOfInstructor, TaskType.valueOf(idOfTaskType), description);
+        return create(instructor, TaskType.valueOf(idOfTaskType), description);
     }
 
-    public Task create(Identificator<Instructor> idOfInstructor, TaskType taskType, String description)
+    public Task create(Instructor instructor, TaskType taskType, String description)
         throws TasksControllerException
     {
         try
         {
-            return getTaskFactory( ).newInstance(idOfInstructor, taskType, description);
+            Task task = getTaskFactory( ).newInstance(instructor, taskType, description);
+            if (task == null)
+            {
+                return Task.EMPTY;
+            }
+            return task;
         } catch (TaskFactoryException e) {
             throw new TasksControllerException (e);
         }
@@ -49,11 +50,6 @@ extends Controller
         }
     }
     
-    private InstructorFactory getInstructorFactory ( )
-    {
-        return Factories.<InstructorFactory>getInstance(InstructorFactory.class);
-    }
-    
     public Task update (Identificator<Instructor> idOfInstructor, Identificator<Task> idOfTask, String newDescription) throws TasksControllerException
     {
         try
@@ -72,15 +68,15 @@ extends Controller
     {
         try
         {
-            task = getTaskFactory( ).update(instructor, task, newDescription);
+            Task updatedTask = getTaskFactory( ).update(instructor, task, newDescription);
+            if (updatedTask == null)
+            {
+                return Task.EMPTY;
+            }
+            return updatedTask;
         } catch (TaskFactoryException e)
         {
             throw new TasksControllerException (e);
         }
-        if (task == null || task.equals(Task.EMPTY))
-        {
-            return Task.EMPTY;
-        }
-        return task;
     }
 }

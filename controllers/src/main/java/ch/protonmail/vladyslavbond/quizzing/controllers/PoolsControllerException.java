@@ -18,4 +18,9 @@ public class PoolsControllerException extends ControllerException
         super(cause);
     }
 
+    public PoolsControllerException(String string)
+    {
+        super(string);
+    }
+
 }

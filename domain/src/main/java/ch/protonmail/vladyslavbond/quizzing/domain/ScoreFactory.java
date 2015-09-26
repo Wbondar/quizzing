@@ -33,7 +33,8 @@ extends SimpleFactory<Score>
     }
 
     @Override
-    public Score getInstance(Identificator<Score> id) throws ScoreFactoryException
+    public Score getInstance(Identificator<Score> id) 
+            throws ScoreFactoryException
     {
         Object[] arguments = {
                 ((NumericIdentificator<Score>)id).longValue( )
@@ -47,7 +48,8 @@ extends SimpleFactory<Score>
         }
     }
 
-    public Set<Score> getInstances (Identificator<FinishedAssessment> id)
+    Set<Score> getInstances (Identificator<FinishedAssessment> id) 
+            throws ScoreFactoryException
     {
         Object[] arguments = {
                 ((NumericIdentificator<FinishedAssessment>)id).longValue( )
@@ -57,11 +59,15 @@ extends SimpleFactory<Score>
         {
             scores.addAll(this.getDataAccess( ).fetchAll("SELECT * FROM view_scores WHERE assessment_id = ?;", arguments));
             return scores;
-        } catch (DataAccessException e)
+        } catch (MapperException | DataAccessException e)
         {
            throw new ScoreFactoryException (e);
-        } finally {
-            return scores;
         }
+    }
+
+    public Set<Score> getInstances(FinishedAssessment finishedAssessment) 
+            throws ScoreFactoryException
+    {
+        return getInstances(finishedAssessment.getId( ));
     }
 }
