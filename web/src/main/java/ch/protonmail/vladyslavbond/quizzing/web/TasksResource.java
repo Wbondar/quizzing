@@ -18,6 +18,7 @@ import ch.protonmail.vladyslavbond.quizzing.controllers.*;
 import ch.protonmail.vladyslavbond.quizzing.domain.*;
 import ch.protonmail.vladyslavbond.quizzing.util.Identificator;
 import ch.protonmail.vladyslavbond.quizzing.util.NumericIdentificator;
+import ch.protonmail.vladyslavbond.quizzing.web.views.TaskCompleteView;
 
 import static ch.protonmail.vladyslavbond.quizzing.web.QuizzingApplication.*;
 
@@ -99,39 +100,7 @@ public enum TasksResource
         {
             return Response.status(Status.NOT_FOUND).build( );
         }
-        StringBuilder html = new StringBuilder ( );
-        html.append("<!DOCTYPE html><html><head><title>Task.</title></head><body>");
-        html.append(String.format("<article id='%d'>", idOfTask));
-        html.append(String.format("<header><h1>Task #%d.</h1></header>", idOfTask));
-        html.append(String.format("<section><h2>Description of task.</h2><p>%s</p></section>", task.getDescription( )));
-        if (task.getOptions( ) != null && !task.getOptions( ).isEmpty())
-        {
-            html.append("<section><h2>Options.</h2>");
-            for (Option option : task.getOptions( ))
-            {
-                Long idOfOption = Long.valueOf(option.getId( ).toString( ));
-                html.append(String.format("<article id='%d'>", idOfOption));
-                html.append(String.format("<header><h3><a href='/tasks/%1$d/options/%2$d'>Option #%2$d.</a></h3></header>", idOfTask, idOfOption));
-                html.append("<section><h4>Message.</h4>");
-                html.append(String.format("<p>%s</p>", option.getMessage( )));
-                html.append("</section>");
-                html.append("<section><h4>Reward.</h4>");
-                html.append(String.format("<p>%d</p>", option.getReward( )));
-                html.append("</section>");
-                html.append("</section>");
-                html.append("</article>");
-            }
-            html.append("</section>");
-        }
-        html.append("</article>");
-        html.append(String.format("<section><h2>%s</h2>", "Update task description."));
-        html.append(String.format("<form action='/tasks/%1$d/update' method='POST'><input type='hidden' name='id' value='%1$d' /><textarea name='description'>%2$s</textarea><input type='submit' /></form>", idOfTask, task.getDescription( )));
-        html.append("</section>");
-        html.append(String.format("<section><h2>%s</h2>", "Delete task."));
-        html.append(String.format("<form action='/tasks/%1$d/destroy' method='POST'><input type='hidden' name='id' value='%1$d' /><input type='submit' /></form>", idOfTask));
-        html.append("</section>");
-        html.append("</body></html>");
-        return Response.ok( ).entity(html.toString( )).build( );
+        return Response.ok( ).entity(new TaskCompleteView(task)).build( );
     }
     
     @POST

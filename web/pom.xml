@@ -54,6 +54,11 @@
       <version>${glassfish.version}</version>
       <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>org.thymeleaf</groupId>
+      <artifactId>thymeleaf</artifactId>
+      <version>2.1.4.RELEASE</version>
+    </dependency>
   </dependencies>
   <build>
     <finalName>web</finalName>
