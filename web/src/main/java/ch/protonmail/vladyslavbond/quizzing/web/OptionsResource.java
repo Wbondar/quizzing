@@ -26,11 +26,9 @@ import ch.protonmail.vladyslavbond.quizzing.util.NumericIdentificator;
 import static ch.protonmail.vladyslavbond.quizzing.web.QuizzingApplication.*;
 
 @Path("/tasks/{task_id : \\d+}/options/")
-public enum OptionsResource
+public final class OptionsResource
 {
-    INSTANCE;
-    
-    private OptionsResource ( ) {}
+    public OptionsResource ( ) {}
     
     @POST
     @Path("/new")

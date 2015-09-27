@@ -33,14 +33,12 @@ import ch.protonmail.vladyslavbond.quizzing.util.Identificator;
 import ch.protonmail.vladyslavbond.quizzing.util.NumericIdentificator;
 
 @Path("/assessments")
-public enum AssessmentsResource
+public final class AssessmentsResource
 {
-    INSTANCE;
-
     private final static Identificator<Student>    ID_OF_STUDENT    = NumericIdentificator.<Student>valueOf(1);
     private final static Identificator<Exam>       ID_OF_EXAM       = NumericIdentificator.<Exam>valueOf(1);
     
-    private AssessmentsResource ( ) {}
+    public AssessmentsResource ( ) {}
     
     @POST
     @Path("/new")

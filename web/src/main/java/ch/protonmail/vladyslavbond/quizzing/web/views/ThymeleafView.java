@@ -11,7 +11,8 @@ import javax.ws.rs.WebApplicationException;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.IContext;
 
-abstract class ThymeleafView implements View
+final class ThymeleafView 
+implements View
 {
     private final String   pathToTemplate;
     private final IContext context;
@@ -32,7 +33,7 @@ abstract class ThymeleafView implements View
             throws IOException, WebApplicationException
     {
         Writer writer = new BufferedWriter(new OutputStreamWriter(os));
-        writer.write(getTemplateEngine( ).process(pathToTemplate, context));
+        getTemplateEngine( ).process(pathToTemplate, context, writer);
         writer.flush();
     }
 }

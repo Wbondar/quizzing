@@ -7,12 +7,10 @@ import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.ext.*;
 
 @Provider
-public enum ErrorResource
+public final class ErrorResource
 implements ExceptionMapper<Exception>
 {
-    INSTANCE ( );
-    
-    private ErrorResource ( ) {}
+    public ErrorResource ( ) {}
 
     @Override
     public Response toResponse (Exception e)

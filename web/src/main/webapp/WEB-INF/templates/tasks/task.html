@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html data-th-inline='text'>
+<head>
+  <title data-th-text='#{task.title}'>Task.</title>
+</head>
+<body>
+<main>
+  <article id='${task.getId( )}'>
+    <header>
+      <h1 data-th-text='#{task.header.main(${task.getId()})}'>Task №?.</h1>
+    </header>
+    <section>
+      <h2 data-th-text='#{task.header.description}'>Description.</h2>
+      <p data-th-text='${task.getDescription()}'>Content of the description.</p>
+    </section>
+    <section>
+      <header>
+        <h2 data-th-text='#{task.header.options}'>Options.</h2>
+      </header>
+      <article th:each='option : ${task.getOptions()}' id='${option.getId( )}'>
+        <header>
+          <h3><a href='/tasks/${task.getId( )}/options/${option.getId( )}' data-th-text='#{task.header.option(${option.getId( )})}'>Option №?.</a></h3>
+        </header>
+        <section>
+          <header>
+            <h4 data-th-text='#{task.header.option.message}'>Message.</h4>
+          </header>
+          <p data-th-text='${option.getMessage( )}'>Message of the option.</p>
+        </section>
+        <section>
+          <header>
+            <h4 data-th-text='#{task.header.option.reward}'>Reward.</h4>
+          </header>
+          <p data-th-text='${option.getReward( )}'>?</p>
+        </section>
+      </article>
+    </section>
+  </article>
+</main>
+<aside>
+  <section>
+    <header>
+      <h2 data-th-text='#{task.header.update}'>Update task.</h2>
+    </header>
+    <form action='/tasks/${task.getId( )}/update' method='POST'>
+      <input type='hidden' name='id' value='${task.getId( )}' />
+      <fieldset>
+        <legend data-th-text='#{task.legend.update}'>Properties of the task.</legend>
+        <label for='description' data-th-text='#{task.label.description}'>Description.</label>
+        <textarea id='description' data-th-text='${task.getDescription( )}' name='description'></textarea>
+      </fieldset>
+      <input type='submit' />
+    </form>
+  </section>
+  <section>
+    <header>
+      <h2 data-th-text='#{task.header.delete}'>Delete task.</h2>
+    </header>
+    <form action='/tasks/${task.getId( )}/destroy' method='POST'>
+      <input type='hidden' name='id' value='${task.getId( )}' />
+      <input type='submit' />
+    </form>
+  </section>
+</aside>
+</body>
+</html>

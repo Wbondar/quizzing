@@ -4,12 +4,15 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Random;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
@@ -18,16 +21,19 @@ import ch.protonmail.vladyslavbond.quizzing.controllers.*;
 import ch.protonmail.vladyslavbond.quizzing.domain.*;
 import ch.protonmail.vladyslavbond.quizzing.util.Identificator;
 import ch.protonmail.vladyslavbond.quizzing.util.NumericIdentificator;
-import ch.protonmail.vladyslavbond.quizzing.web.views.TaskCompleteView;
+import ch.protonmail.vladyslavbond.quizzing.web.views.ViewFactory;
 
 import static ch.protonmail.vladyslavbond.quizzing.web.QuizzingApplication.*;
 
 @Path("/tasks")
-public enum TasksResource
+public final class TasksResource
 {
-    INSTANCE;
+    @Context 
+    private HttpServletRequest request;
+    @Context 
+    private HttpServletResponse response;
     
-    private TasksResource ( ) {}
+    public TasksResource ( ) {}
 
     @POST
     @Path("/new")
@@ -94,13 +100,12 @@ public enum TasksResource
         throws ControllerException
     {
         Tasks controller = Controllers.<Tasks>getInstance(Tasks.class);
-        Task task = Task.EMPTY;
-            task = controller.retrieve(idOfTask);
+        Task task = task = controller.retrieve(idOfTask);
         if (task == null || task.equals(Task.EMPTY))
         {
             return Response.status(Status.NOT_FOUND).build( );
         }
-        return Response.ok( ).entity(new TaskCompleteView(task)).build( );
+        return Response.ok( ).entity(ViewFactory.getTaskCompleteView(request, response, task)).build( );
     }
     
     @POST

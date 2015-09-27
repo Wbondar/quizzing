@@ -1,5 +1,6 @@
 package ch.protonmail.vladyslavbond.quizzing.web;
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Random;
 import java.util.Set;
@@ -59,21 +60,17 @@ extends Application
     public final static Instructor INSTRUCTOR;
     public final static Pool       POOL      ;
 
-    private final static Set<Class<?>> classes = new HashSet<Class<?>> ( );
-    private final static Set<Object>   singletons = new HashSet<Object> ( );
-    
-    static
-    {
-        classes.add(TasksResource.class);
-        classes.add(OptionsResource.class);
-        classes.add(AssessmentsResource.class);
-        singletons.add(TasksResource.INSTANCE);
-        singletons.add(OptionsResource.INSTANCE);
-        singletons.add(AssessmentsResource.INSTANCE);
-    }
+    private final Set<Class<?>> classes;
+    private final Set<Object>   singletons;
     
     public QuizzingApplication ( )
     {
+        Set<Class<?>> classes = new HashSet<Class<?>> ( );
+        classes.add(TasksResource.class);
+        classes.add(OptionsResource.class);
+        classes.add(AssessmentsResource.class);
+        this.classes = classes;
+        this.singletons = Collections.<Object>emptySet( );
     }
     
     @Override
